@@ -10,7 +10,8 @@
     ],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "moduleResolution": "nodenext"
   },
   "exclude": ["node_modules"]
 }
