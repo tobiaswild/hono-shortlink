@@ -32,9 +32,21 @@ app.get('/:code', async (c) => {
   return c.redirect(url)
 })
 
-serve({
+const server = serve({
   fetch: app.fetch,
   port: 3000
 }, (info) => {
   console.log(`Server is running on http://localhost:${info.port}`)
 })
+
+// Graceful shutdown handler
+function gracefulShutdown(signal: string) {
+  console.log(`\nReceived ${signal}. Shutting down gracefully...`);
+  server.close(() => {
+    console.log('Server has been closed.');
+    process.exit(0);
+  });
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
