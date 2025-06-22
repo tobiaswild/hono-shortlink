@@ -22,6 +22,25 @@ pnpm run dev
 
 The server will start at [http://localhost:3000](http://localhost:3000)
 
+## Running with Docker
+
+You can also run the application inside a Docker container.
+
+### 1. Build the Image
+
+First, build the Docker image:
+```bash
+docker build -t hono-shortlink .
+```
+
+### 2. Run the Container
+
+Then, run the container, mapping port 3000 to your local machine:
+```bash
+docker run -p 3000:3000 --name my-shortlink-app hono-shortlink
+```
+The application will be available at `http://localhost:3000`.
+
 ## Build
 
 ```bash
@@ -72,6 +91,9 @@ This project includes a GitHub Actions workflow for automated deployment to a Li
 ### How it works
 - On every push to `main`, the workflow builds the app and deploys the `dist/` folder to your server.
 - After deployment, pm2 reloads or starts the service automatically.
+
+## Docker Deployment
+This repository is also configured with a GitHub Actions workflow to automatically build and publish a Docker image to the GitHub Container Registry (GHCR) on every push to `main`. You can pull and run this image directly for deployment.
 
 ---
 
