@@ -22,24 +22,37 @@ pnpm run dev
 
 The server will start at [http://localhost:3000](http://localhost:3000)
 
-## Running with Docker
+## Docker Usage
 
-You can also run the application inside a Docker container.
+This project is fully containerized and can be run locally or deployed using Docker.
 
-### 1. Build the Image
+### Running Locally
 
-First, build the Docker image:
+1.  **Build the image:**
+    ```bash
+    docker build -t hono-shortlink .
+    ```
+
+2.  **Run the container:**
+    ```bash
+    docker run --rm -it -p 3000:3000 --name my-shortlink-app hono-shortlink
+    ```
+    - `--rm`: Automatically removes the container when it exits.
+    - `-it`: Runs in interactive mode, allowing you to stop it with `Ctrl+C`.
+    - The server will be available at `http://localhost:3000`.
+
+### Running the Pre-built Image from GHCR
+
+A new image is automatically built and pushed to the GitHub Container Registry (GHCR) on every push to `main`. You can run the latest version directly:
+
 ```bash
-docker build -t hono-shortlink .
+docker run --rm -it -p 3000:3000 --name my-shortlink-app ghcr.io/tobiaswild/hono-shortlink:latest
 ```
 
-### 2. Run the Container
+> **Note:** If the package is private, you may need to log in to GHCR first with `docker login ghcr.io`.
 
-Then, run the container, mapping port 3000 to your local machine:
-```bash
-docker run -p 3000:3000 --name my-shortlink-app hono-shortlink
-```
-The application will be available at `http://localhost:3000`.
+### Graceful Shutdown
+The container is configured to handle `SIGINT` and `SIGTERM` signals, allowing for a graceful shutdown when you press `Ctrl+C` or run `docker stop`.
 
 ## Build
 
