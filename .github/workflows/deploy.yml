@@ -1,0 +1,36 @@
+name: Deploy Shortlink
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Shortlink App
+        run: pnpm run build
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i --delete"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.DEPLOY_REMOTE_USER }}
+          TARGET: ${{ secrets.DEPLOY_REMOTE_TARGET }}
+          SCRIPT_AFTER: |
+            pm2 reload hono-shortlink || pm2 start ${{ secrets.DEPLOY_REMOTE_TARGET }}/index.js --name hono-shortlink 
