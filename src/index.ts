@@ -23,8 +23,12 @@ async function saveUrlMap(map: Map<string, string>) {
 
 const app = new Hono()
 
-// In-memory storage for shortlinks
-const urlMap = new Map<string, string>()
+let urlMap: Map<string, string>
+
+// Load urlMap from file before starting the server
+await (async () => {
+  urlMap = await loadUrlMap()
+})()
 
 // Helper to generate a random 6-character code
 function generateCode(length = 6) {
@@ -53,6 +57,7 @@ app.post('/shorten', async (c) => {
     code = generateCode()
   } while (urlMap.has(code))
   urlMap.set(code, url)
+  await saveUrlMap(urlMap)
   const shortUrl = `${c.req.url.split('/').slice(0, 3).join('/')}/${code}`
   return c.json({ short: shortUrl })
 })
