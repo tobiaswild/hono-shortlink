@@ -20,6 +20,23 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
 
+// POST /shorten - create a shortlink
+app.post('/shorten', async (c) => {
+  const body = await c.req.json<{ url?: string }>()
+  const url = body.url
+  if (!url || typeof url !== 'string') {
+    return c.json({ error: 'Invalid URL' }, 400)
+  }
+  // Generate unique code
+  let code
+  do {
+    code = generateCode()
+  } while (urlMap.has(code))
+  urlMap.set(code, url)
+  const shortUrl = `${c.req.url.split('/').slice(0, 3).join('/')}/${code}`
+  return c.json({ short: shortUrl })
+})
+
 serve({
   fetch: app.fetch,
   port: 3000
