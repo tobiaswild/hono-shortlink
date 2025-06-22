@@ -20,7 +20,7 @@ app.post('/shorten', async (c) => {
   let code
   do {
     code = generateCode()
-  } while (urlStore.has(code))
+  } while (await urlStore.has(code))
   await urlStore.set(code, url)
   const shortUrl = `${c.req.url.split('/').slice(0, 3).join('/')}/${code}`
   return c.json({ short: shortUrl })
