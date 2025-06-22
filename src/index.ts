@@ -1,44 +1,9 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import { promises as fs } from 'fs'
-import path from 'path'
-
-const DATA_FILE = path.join(process.cwd(), 'data.json')
-
-// Load mappings from file
-async function loadUrlMap() {
-  try {
-    const data = await fs.readFile(DATA_FILE, 'utf-8')
-    return new Map(Object.entries(JSON.parse(data)))
-  } catch (e) {
-    return new Map()
-  }
-}
-
-// Save mappings to file
-async function saveUrlMap(map: Map<string, string>) {
-  const obj = Object.fromEntries(map)
-  await fs.writeFile(DATA_FILE, JSON.stringify(obj, null, 2), 'utf-8')
-}
+import urlStore from './urlStore.js'
+import generateCode from './shortlink.js'
 
 const app = new Hono()
-
-let urlMap: Map<string, string>
-
-// Load urlMap from file before starting the server
-await (async () => {
-  urlMap = await loadUrlMap()
-})()
-
-// Helper to generate a random 6-character code
-function generateCode(length = 6) {
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let result = ''
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
-}
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')
@@ -55,17 +20,16 @@ app.post('/shorten', async (c) => {
   let code
   do {
     code = generateCode()
-  } while (urlMap.has(code))
-  urlMap.set(code, url)
-  await saveUrlMap(urlMap)
+  } while (urlStore.has(code))
+  await urlStore.set(code, url)
   const shortUrl = `${c.req.url.split('/').slice(0, 3).join('/')}/${code}`
   return c.json({ short: shortUrl })
 })
 
 // GET /:code - redirect to original URL
-app.get('/:code', (c) => {
+app.get('/:code', async (c) => {
   const code = c.req.param('code')
-  const url = urlMap.get(code)
+  const url = await urlStore.get(code)
   if (!url) {
     return c.text('Shortlink not found', 404)
   }
