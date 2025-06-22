@@ -5,10 +5,6 @@ import generateCode from './shortlink.js'
 
 const app = new Hono()
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
-
 // POST /shorten - create a shortlink
 app.post('/shorten', async (c) => {
   const body = await c.req.json<{ url?: string }>()
