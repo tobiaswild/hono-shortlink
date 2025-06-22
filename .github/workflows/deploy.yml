@@ -39,9 +39,8 @@ jobs:
         with:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i --delete"
-          SOURCE: "dist/"
           REMOTE_HOST: ${{ secrets.DEPLOY_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.DEPLOY_REMOTE_USER }}
           TARGET: ${{ secrets.DEPLOY_REMOTE_TARGET }}
           SCRIPT_AFTER: |
-            pm2 reload hono-shortlink || pm2 start ${{ secrets.DEPLOY_REMOTE_TARGET }}/index.js --name hono-shortlink 
+            pm2 reload hono-shortlink || pm2 start ${{ secrets.DEPLOY_REMOTE_TARGET }}/dist/index.js --name hono-shortlink 
