@@ -37,6 +37,16 @@ app.post('/shorten', async (c) => {
   return c.json({ short: shortUrl })
 })
 
+// GET /:code - redirect to original URL
+app.get('/:code', (c) => {
+  const code = c.req.param('code')
+  const url = urlMap.get(code)
+  if (!url) {
+    return c.text('Shortlink not found', 404)
+  }
+  return c.redirect(url)
+})
+
 serve({
   fetch: app.fetch,
   port: 3000
