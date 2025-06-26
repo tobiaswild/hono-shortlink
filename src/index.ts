@@ -2,6 +2,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import urlStore from './urlStore.js'
 import generateCode from './shortlink.js'
+import './db.js'
 
 const app = new Hono()
 
