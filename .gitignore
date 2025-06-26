@@ -29,3 +29,5 @@ lerna-debug.log*
 
 # Runtime data
 data.json
+
+local.db
