@@ -2,140 +2,155 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import * as z from 'zod/v4';
+import { requireAuth } from './middleware/auth.js';
+import { requireNoAuth } from './middleware/no-auth.js';
+import sessionStore from './sessionStore.js';
 import DashboardPage from './templates/dashboard.js';
 import LoginPage from './templates/login.js';
 import urlStore from './urlStore.js';
 import { getCode } from './util/code.js';
 import { wantsHtml } from './util/html.js';
+import { SESSION_COOKIE } from './util/session.js';
 import { getBaseUrl } from './util/url.js';
 
-// Admin API key - in production, use environment variable
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'your-secret-admin-key';
-
-// Simple session management
-const sessions = new Map<string, { isAdmin: boolean; expires: number }>();
-
-// Middleware to check admin authentication
-const requireAdminAuth = async (c: any, next: any) => {
-  const sessionId = getCookie(c, 'admin_session');
-
-  if (!sessionId || !sessions.has(sessionId)) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
-
-  const session = sessions.get(sessionId);
-  if (!session || !session.isAdmin || session.expires < Date.now()) {
-    sessions.delete(sessionId);
-    setCookie(c, 'admin_session', '', { maxAge: 0, path: '/' });
-    return c.json({ error: 'Session expired' }, 401);
-  }
-
-  await next();
-};
 
 const app = new Hono();
 
-app.get('/dashboard', async (c) => {
-  const sessionId = getCookie(c, 'admin_session');
-  const isAuthenticated = sessionId && sessions.has(sessionId);
-
-  if (!isAuthenticated) {
-    return c.redirect('/admin/login');
-  }
-
+app.get('/dashboard', requireAuth, async (c) => {
   const shortlinks = await urlStore.getAll();
+
+  if (!wantsHtml(c)) {
+    return c.json(
+      {
+        success: true,
+        code: 200,
+        data: shortlinks,
+      },
+      200
+    );
+  }
 
   return c.html(DashboardPage({ shortlinks, baseUrl: getBaseUrl(c) }));
 });
 
-app.get('/login', (c) => {
-  const sessionId = getCookie(c, 'admin_session');
-  const isAuthenticated = sessionId && sessions.has(sessionId);
-
-  if (isAuthenticated) {
-    return c.redirect('/admin/dashboard');
+app.get('/login', requireNoAuth, (c) => {
+  if (!wantsHtml(c)) {
+    return c.json(
+      {
+        success: false,
+        code: 400,
+        message: 'login via post',
+      },
+      400
+    );
   }
 
   return c.html(LoginPage());
 });
 
-app.post(
-  '/login',
-  zValidator(
-    'form',
-    z.object({
-      apiKey: z.string(),
-    }),
-    (result, c) => {
-      if (!result.success) {
-        return c.json({ error: 'Invalid API key' }, 401);
-      }
-    }
-  ),
-  async (c) => {
-    const formData = await c.req.formData();
+app.post('/login', requireNoAuth, async (c) => {
+  const formData = await c.req.formData();
 
-    const apiKey = formData.get('apiKey');
+  const apiKey = formData.get('apiKey');
 
-    console.log(apiKey);
-
-    if (apiKey !== ADMIN_API_KEY) {
-      return c.json({ error: 'Invalid API key' }, 401);
+  if (apiKey !== ADMIN_API_KEY) {
+    if (!wantsHtml(c)) {
+      return c.json(
+        {
+          success: false,
+          code: 401,
+          error: 'Invalid API key',
+        },
+        401
+      );
     }
 
-    const sessionId = crypto.randomUUID();
-    const expires = Date.now() + 24 * 60 * 60 * 1000;
-    sessions.set(sessionId, { isAdmin: true, expires });
-
-    setCookie(c, 'admin_session', sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
-
-    return c.redirect('/admin/dashboard');
+    return c.redirect('/admin/login');
   }
-);
 
-// Logout route
-app.post('/logout', async (c) => {
-  const sessionId = getCookie(c, 'admin_session');
-  if (sessionId) {
-    sessions.delete(sessionId);
-  }
-  setCookie(c, 'admin_session', '', { maxAge: 0, path: '/' });
+  const sessionId = crypto.randomUUID();
+
+  const expires = Date.now() + 24 * 60 * 60 * 1000;
+
+  sessionStore.set(sessionId, expires);
+
+  setCookie(c, SESSION_COOKIE, sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
 
   if (!wantsHtml(c)) {
-    return c.json({ message: 'you got signed out' }, 200);
+    return c.json({
+      success: true,
+      code: 200,
+      message: 'logged in',
+    });
+  }
+
+  return c.redirect('/admin/dashboard');
+});
+
+app.post('/logout', requireAuth, async (c) => {
+  const sessionId = getCookie(c, SESSION_COOKIE);
+  if (sessionId) {
+    sessionStore.delete(sessionId);
+  }
+  setCookie(c, SESSION_COOKIE, '', { maxAge: 0, path: '/' });
+
+  if (!wantsHtml(c)) {
+    return c.json({ success: true, code: 200, message: 'you got signed out' }, 200);
   }
 
   return c.redirect('/admin/login');
 });
 
-// Create shortlink route
 app.post(
   '/create',
-  requireAdminAuth,
+  requireAuth,
   zValidator(
-    'json',
+    'form',
     z.object({
       url: z.url(),
       customCode: z.string().length(6).optional(),
     }),
     (result, c) => {
       if (!result.success) {
-        return c.json({ error: z.prettifyError(result.error) }, 400);
+        if (!wantsHtml(c)) {
+          return c.json(
+            {
+              success: false,
+              code: 400,
+              error: z.prettifyError(result.error),
+            },
+            400
+          );
+        }
+
+        return c.redirect('/admin/dashboard');
       }
     }
   ),
   async (c) => {
-    const body = c.req.valid('json');
+    const body = c.req.valid('form');
     const { url, customCode } = body;
 
     try {
       let code: string;
 
       if (customCode) {
-        // Check if custom code already exists
         const exists = await urlStore.has(customCode);
+
         if (exists) {
-          return c.json({ error: 'Custom code already exists' }, 400);
+          if (!wantsHtml(c)) {
+            return c.json(
+              {
+                success: false,
+                code: 400,
+                error: 'Custom code already exists',
+              },
+              400
+            );
+          }
+
+          return c.redirect('/admin/dashboard');
         }
         code = customCode;
       } else {
@@ -144,19 +159,26 @@ app.post(
 
       await urlStore.set(code, url);
 
-      const shortUrl = `${c.req.url.split('/').slice(0, 3).join('/')}/${code}`;
+      const shortUrl = `${getBaseUrl(c)}/${code}`;
 
-      return c.json({ short: shortUrl });
+      if (!wantsHtml(c)) {
+        return c.json({ success: true, code: 200, short: shortUrl });
+      }
+
+      return c.redirect('/admin/dashboard');
     } catch (error) {
-      return c.json({ error: 'Failed to create shortlink' }, 500);
+      if (!wantsHtml(c)) {
+        return c.json({ success: false, code: 500, error: 'Failed to create shortlink' }, 500);
+      }
+
+      return c.redirect('/admin/dashboard');
     }
   }
 );
 
-// Delete shortlink route
-app.delete(
+app.post(
   '/delete/:code',
-  requireAdminAuth,
+  requireAuth,
   zValidator(
     'param',
     z.object({
@@ -164,7 +186,18 @@ app.delete(
     }),
     (result, c) => {
       if (!result.success) {
-        return c.json({ error: z.prettifyError(result.error) }, 400);
+        if (!wantsHtml(c)) {
+          return c.json(
+            {
+              success: false,
+              code: 400,
+              error: z.prettifyError(result.error),
+            },
+            400
+          );
+        }
+
+        return c.redirect('/admin/dashboard');
       }
     }
   ),
@@ -175,12 +208,42 @@ app.delete(
       const deleted = await urlStore.delete(code);
 
       if (!deleted) {
-        return c.json({ error: 'Shortlink not found' }, 404);
+        if (!wantsHtml(c)) {
+          return c.json(
+            {
+              success: false,
+              code: 404,
+              error: 'Shortlink not found',
+            },
+            404
+          );
+        }
+
+        return c.redirect('/admin/dashboard');
       }
 
-      return c.json({ success: true, message: 'Shortlink deleted successfully' });
+      if (!wantsHtml(c)) {
+        return c.json({
+          success: true,
+          code: 200,
+          message: 'Shortlink deleted successfully',
+        });
+      }
+
+      return c.redirect('/admin/dashboard');
     } catch (error) {
-      return c.json({ error: 'Failed to delete shortlink' }, 500);
+      if (!wantsHtml(c)) {
+        return c.json(
+          {
+            success: false,
+            code: 500,
+            error: 'Failed to delete shortlink',
+          },
+          500
+        );
+      }
+
+      return c.redirect('/admin/dashboard');
     }
   }
 );

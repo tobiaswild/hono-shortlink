@@ -1,6 +1,5 @@
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { compress } from 'hono/compress';
 import { cors } from 'hono/cors';
@@ -9,9 +8,11 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
-import * as z from 'zod/v4';
 import admin from './admin.js';
+import ErrorPage from './templates/error.js';
+import NotFoundPage from './templates/not-found.js';
 import urlStore from './urlStore.js';
+import { wantsHtml } from './util/html.js';
 
 const app = new Hono();
 
@@ -22,41 +23,92 @@ app.use(prettyJSON());
 app.use(cors());
 app.use(compress());
 
-// Serve static files
 app.use('/static/*', serveStatic({ root: './' }));
 app.use('/favicon.ico', serveStatic({ path: './static/favicon.svg' }));
 
-// Mount admin routes
 app.route('/admin', admin);
 
-// GET /:code - redirect to original URL
-app.get(
-  '/:code',
-  zValidator(
-    'param',
-    z.object({
-      code: z.string().refine((val) => val.length === 6, {
-        error: 'code is 6 character long',
-      }),
-    }),
-    (result, c) => {
-      if (!result.success) {
-        return c.text(z.prettifyError(result.error), 400);
-      }
-    }
-  ),
-  async (c) => {
-    const code = c.req.param('code');
+app.get('/', (c) => {
+  const url = 'https://github.com/tobiaswild/hono-shortlink';
 
-    const url = await urlStore.get(code);
-
-    if (!url) {
-      return c.text('Shortlink not found', 404);
-    }
-
-    return c.redirect(url);
+  if (!wantsHtml(c)) {
+    return c.json(
+      {
+        success: true,
+        code: 200,
+        url: url,
+      },
+      200
+    );
   }
-);
+
+  return c.redirect(url);
+});
+
+app.get('/:code', async (c) => {
+  const code = c.req.param('code');
+
+  const url = await urlStore.get(code);
+
+  if (!url) {
+    if (!wantsHtml(c)) {
+      return c.json(
+        {
+          success: false,
+          code: 404,
+          message: 'Shortlink not found',
+        },
+        404
+      );
+    }
+
+    return c.html(NotFoundPage());
+  }
+
+  if (!wantsHtml(c)) {
+    return c.json({
+      success: true,
+      code: 200,
+      url: url,
+    });
+  }
+
+  return c.redirect(url);
+});
+
+app.notFound((c) => {
+  if (!wantsHtml(c)) {
+    return c.json(
+      {
+        success: false,
+        code: 404,
+        message: '404 Not Found',
+      },
+      404
+    );
+  }
+
+  return c.html(NotFoundPage());
+});
+
+app.onError((err, c) => {
+  console.error(`${err}`);
+
+  if (!wantsHtml(c)) {
+    return c.json(
+      {
+        success: false,
+        code: 500,
+        message: err.message,
+      },
+      500
+    );
+  }
+
+  return c.html(ErrorPage());
+});
+
+showRoutes(app);
 
 const server = serve(
   {
@@ -68,18 +120,16 @@ const server = serve(
   }
 );
 
-showRoutes(app, {
-  verbose: false,
+process.on('SIGINT', () => {
+  server.close();
+  process.exit(0);
 });
-
-// Graceful shutdown handler
-function gracefulShutdown(signal: string) {
-  console.log(`\nReceived ${signal}. Shutting down gracefully...`);
-  server.close(() => {
-    console.log('Server has been closed.');
+process.on('SIGTERM', () => {
+  server.close((err) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
     process.exit(0);
   });
-}
-
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+});

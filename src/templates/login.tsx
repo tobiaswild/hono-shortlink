@@ -26,13 +26,6 @@ export default function LoginPage() {
               Login
             </button>
           </form>
-          <div id="loginResult"></div>
-          <div class={styles.info}>
-            <p>
-              Default API Key: <code>your-secret-admin-key</code>
-            </p>
-            <p>Set ADMIN_API_KEY environment variable to customize</p>
-          </div>
         </div>
       </div>
     </Layout>

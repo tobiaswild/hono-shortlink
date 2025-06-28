@@ -26,7 +26,7 @@ export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl:
 
         <div class={styles.section}>
           <h2 class={styles.sectionH2}>➕ Create New Shortlink</h2>
-          <form id="createForm">
+          <form id="createForm" method="post" action="/admin/create">
             <div class={styles.formGroup}>
               <label for="url" class={styles.formGroupLabel}>
                 Target URL:
@@ -103,12 +103,13 @@ export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl:
                     >
                       Copy
                     </button>
-                    <button
-                      class={cx(styles.btn, styles.deleteBtn)}
-                      onclick={`deleteShortlink('${link.code}')`}
-                    >
-                      Delete
-                    </button>
+                    <button onclick={`deleteShortlink('${link.code}')`}>Delete</button>
+
+                    <form method="post" action={`/admin/delete/${link.code}`}>
+                      <button type="submit" class={cx(styles.btn, styles.deleteBtn)}>
+                        Delete
+                      </button>
+                    </form>
                   </td>
                 </tr>
               ))}
