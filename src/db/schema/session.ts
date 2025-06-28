@@ -1,7 +1,9 @@
 import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-export const sessionTable = sqliteTable('session', {
+const sessionTable = sqliteTable('session', {
   id: int().primaryKey({ autoIncrement: true }),
   code: text().notNull().unique(),
   expires: int().notNull(),
 });
+
+export default sessionTable;

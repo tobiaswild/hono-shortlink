@@ -1,11 +1,11 @@
+import { env } from '@/config/env.js';
 import sessionStore from '@/db/store/session.js';
 import { wantsHtml } from '@/util/html.js';
-import { SESSION_COOKIE } from '@/util/session.js';
 import type { Context, Next } from 'hono';
 import { deleteCookie, getCookie } from 'hono/cookie';
 
 export const requireNoAuth = async (c: Context, next: Next) => {
-  const sessionId = getCookie(c, SESSION_COOKIE);
+  const sessionId = getCookie(c, env.SESSION_COOKIE);
   if (sessionId === undefined) {
     await next();
 
@@ -14,7 +14,7 @@ export const requireNoAuth = async (c: Context, next: Next) => {
 
   const hasSession = await sessionStore.has(sessionId);
   if (!hasSession) {
-    deleteCookie(c, SESSION_COOKIE);
+    deleteCookie(c, env.SESSION_COOKIE);
 
     next();
 
@@ -23,7 +23,7 @@ export const requireNoAuth = async (c: Context, next: Next) => {
 
   const session = await sessionStore.get(sessionId);
   if (!session || session.expires < Date.now()) {
-    deleteCookie(c, SESSION_COOKIE);
+    deleteCookie(c, env.SESSION_COOKIE);
 
     next();
 

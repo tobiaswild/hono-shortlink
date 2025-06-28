@@ -1,5 +1,5 @@
-import { db } from '@/db/db.js';
-import { shortlinkTable } from '@/db/schema/shortlink.js';
+import db from '@/db/index.js';
+import shortlinkTable from '@/db/schema/shortlink.js';
 import { eq } from 'drizzle-orm';
 
 export default {
@@ -24,7 +24,7 @@ export default {
     return await db.select().from(shortlinkTable).orderBy(shortlinkTable.id);
   },
   async delete(code: string) {
-    const result = await db.delete(shortlinkTable).where(eq(shortlinkTable.code, code));
+    const result = await db.delete(shortlinkTable).where(eq(shortlinkTable.code, code)).run();
     return result.rowsAffected > 0;
   },
 };

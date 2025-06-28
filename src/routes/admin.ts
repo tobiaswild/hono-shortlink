@@ -7,7 +7,6 @@ import DashboardPage from '@/templates/dashboard.js';
 import LoginPage from '@/templates/login.js';
 import { getCode } from '@/util/code.js';
 import { wantsHtml } from '@/util/html.js';
-import { SESSION_COOKIE } from '@/util/session.js';
 import { getBaseUrl } from '@/util/url.js';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
@@ -76,7 +75,7 @@ app.post('/login', requireNoAuth, async (c) => {
 
   sessionStore.set(sessionId, expires);
 
-  setCookie(c, SESSION_COOKIE, sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
+  setCookie(c, env.SESSION_COOKIE, sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
 
   if (!wantsHtml(c)) {
     return c.json({
@@ -90,11 +89,11 @@ app.post('/login', requireNoAuth, async (c) => {
 });
 
 app.post('/logout', requireAuth, async (c) => {
-  const sessionId = getCookie(c, SESSION_COOKIE);
+  const sessionId = getCookie(c, env.SESSION_COOKIE);
   if (sessionId) {
     sessionStore.delete(sessionId);
   }
-  setCookie(c, SESSION_COOKIE, '', { maxAge: 0, path: '/' });
+  setCookie(c, env.SESSION_COOKIE, '', { maxAge: 0, path: '/' });
 
   if (!wantsHtml(c)) {
     return c.json({ success: true, code: 200, message: 'you got signed out' }, 200);
@@ -119,7 +118,7 @@ app.post(
             {
               success: false,
               code: 400,
-              error: z.prettifyError(result.error),
+              error: JSON.parse(result.error.message),
             },
             400
           );
@@ -183,7 +182,7 @@ app.post(
   zValidator(
     'param',
     z.object({
-      code: z.string().length(6),
+      code: z.string(),
     }),
     (result, c) => {
       if (!result.success) {
@@ -192,7 +191,7 @@ app.post(
             {
               success: false,
               code: 400,
-              error: z.prettifyError(result.error),
+              error: JSON.parse(result.error.message),
             },
             400
           );

@@ -11,6 +11,7 @@ const envSchema = z.object({
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().min(1).max(65535))
     .default('3000'),
+  SESSION_COOKIE: z.string().min(1, 'Session cookie name is required').default('session'),
 });
 
 const parseEnv = () => {

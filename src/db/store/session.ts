@@ -1,5 +1,5 @@
-import { db } from '@/db/db.js';
-import { sessionTable } from '@/db/schema/session.js';
+import db from '@/db/index.js';
+import sessionTable from '@/db/schema/session.js';
 import { and, eq, gte } from 'drizzle-orm';
 
 export default {

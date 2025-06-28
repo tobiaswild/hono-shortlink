@@ -1,4 +1,3 @@
-import { env } from '@/config/env.js';
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
@@ -6,6 +5,6 @@ export default defineConfig({
   schema: './src/db/schema',
   dialect: 'sqlite',
   dbCredentials: {
-    url: env.DB_FILE_NAME,
+    url: `file:${process.env.DB_FILE_NAME}`,
   },
 });
