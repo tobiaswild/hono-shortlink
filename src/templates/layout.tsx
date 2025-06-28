@@ -1,4 +1,5 @@
 import { Style } from 'hono/css';
+import { styles } from '../styles/main.js';
 
 export default function Layout(props: { title: string; children: any }) {
   return (
@@ -10,7 +11,7 @@ export default function Layout(props: { title: string; children: any }) {
         <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
         <Style />
       </head>
-      <body>{props.children}</body>
+      <body class={styles.body}>{props.children}</body>
     </html>
   );
 }

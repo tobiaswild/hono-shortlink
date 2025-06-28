@@ -49,6 +49,24 @@ export const styles = {
     font-size: 16px;
   `,
   btn: css`
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    overflow: visible;
+
+    background: transparent;
+
+    color: inherit;
+    font: inherit;
+
+    line-height: normal;
+
+    -webkit-font-smoothing: inherit;
+    -moz-osx-font-smoothing: inherit;
+
+    -webkit-appearance: none;
+
     padding: 4px 8px;
     border: none;
     border-radius: 4px;
@@ -76,9 +94,6 @@ export const styles = {
   `,
   btnDangerHover: css`
     background: #b91c1c;
-  `,
-  btnLogout: css`
-    margin-top: 10px;
   `,
   copyBtn: css`
     background: #059669;
@@ -202,5 +217,13 @@ export const styles = {
     color: #666;
     margin-top: 20px;
     font-size: 14px;
+  `,
+  linkReset: css`
+    text-decoration: none;
+  `,
+  buttons: css`
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
   `,
 };

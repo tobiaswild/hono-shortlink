@@ -3,19 +3,18 @@ import type { Shortlink } from '../db/schema.js';
 import { styles } from '../styles/main.js';
 import Layout from './layout.js';
 
-export default function DashboardPage(props: {
-  shortlinks: Shortlink[];
-  baseUrl: string;
-}) {
+export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl: string }) {
   return (
-    <Layout title="test">
+    <Layout title="Shortlink Admin Dashboard">
       <div class={styles.container}>
         <div class={styles.header}>
           <h1 class={styles.headerH1}>🔗 Shortlink Admin Dashboard</h1>
           <p>Manage your shortlinks and create new ones</p>
-          <button onclick="logout()" class={cx(styles.btn, styles.btnDanger, styles.btnLogout)}>
-            Logout
-          </button>
+          <form method="post" action="/admin/logout">
+            <button type="submit" class={cx(styles.btn, styles.btnDanger)}>
+              Logout
+            </button>
+          </form>
         </div>
 
         <div class={styles.stats}>
@@ -90,13 +89,14 @@ export default function DashboardPage(props: {
                   >
                     {props.baseUrl}/{link.code}
                   </td>
-                  <td class={styles.tableTd}>
-                    <button
-                      class={cx(styles.btn, styles.openBtn)}
-                      onclick={`openShortlink('${props.baseUrl}/${link.code}')`}
+                  <td class={cx(styles.tableTd, styles.buttons)}>
+                    <a
+                      class={cx(styles.linkReset, styles.btn, styles.openBtn)}
+                      href={`${props.baseUrl}/${link.code}`}
+                      target={'_blank'}
                     >
                       Open
-                    </button>
+                    </a>
                     <button
                       class={cx(styles.btn, styles.copyBtn)}
                       onclick={`copyToClipboard('${props.baseUrl}/${link.code}')`}

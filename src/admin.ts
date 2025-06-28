@@ -6,6 +6,8 @@ import DashboardPage from './templates/dashboard.js';
 import LoginPage from './templates/login.js';
 import urlStore from './urlStore.js';
 import { getCode } from './util/code.js';
+import { wantsHtml } from './util/html.js';
+import { getBaseUrl } from './util/url.js';
 
 // Admin API key - in production, use environment variable
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'your-secret-admin-key';
@@ -33,25 +35,63 @@ const requireAdminAuth = async (c: any, next: any) => {
 
 const app = new Hono();
 
-// Login route
-app.post('/login', async (c) => {
-  const body = await c.req.json();
-  const { apiKey } = body;
+app.get('/dashboard', async (c) => {
+  const sessionId = getCookie(c, 'admin_session');
+  const isAuthenticated = sessionId && sessions.has(sessionId);
 
-  if (apiKey !== ADMIN_API_KEY) {
-    return c.json({ error: 'Invalid API key' }, 401);
+  if (!isAuthenticated) {
+    return c.redirect('/admin/login');
   }
 
-  // Create session
-  const sessionId = crypto.randomUUID();
-  const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-  sessions.set(sessionId, { isAdmin: true, expires });
+  const shortlinks = await urlStore.getAll();
 
-  // Set session cookie
-  setCookie(c, 'admin_session', sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
-
-  return c.json({ success: true });
+  return c.html(DashboardPage({ shortlinks, baseUrl: getBaseUrl(c) }));
 });
+
+app.get('/login', (c) => {
+  const sessionId = getCookie(c, 'admin_session');
+  const isAuthenticated = sessionId && sessions.has(sessionId);
+
+  if (isAuthenticated) {
+    return c.redirect('/admin/dashboard');
+  }
+
+  return c.html(LoginPage());
+});
+
+app.post(
+  '/login',
+  zValidator(
+    'form',
+    z.object({
+      apiKey: z.string(),
+    }),
+    (result, c) => {
+      if (!result.success) {
+        return c.json({ error: 'Invalid API key' }, 401);
+      }
+    }
+  ),
+  async (c) => {
+    const formData = await c.req.formData();
+
+    const apiKey = formData.get('apiKey');
+
+    console.log(apiKey);
+
+    if (apiKey !== ADMIN_API_KEY) {
+      return c.json({ error: 'Invalid API key' }, 401);
+    }
+
+    const sessionId = crypto.randomUUID();
+    const expires = Date.now() + 24 * 60 * 60 * 1000;
+    sessions.set(sessionId, { isAdmin: true, expires });
+
+    setCookie(c, 'admin_session', sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
+
+    return c.redirect('/admin/dashboard');
+  }
+);
 
 // Logout route
 app.post('/logout', async (c) => {
@@ -60,21 +100,12 @@ app.post('/logout', async (c) => {
     sessions.delete(sessionId);
   }
   setCookie(c, 'admin_session', '', { maxAge: 0, path: '/' });
-  return c.json({ success: true });
-});
 
-// Main admin dashboard
-app.get('/', async (c) => {
-  const sessionId = getCookie(c, 'admin_session');
-  const isAuthenticated = sessionId && sessions.has(sessionId);
-
-  if (!isAuthenticated) {
-    return c.html(LoginPage());
+  if (!wantsHtml(c)) {
+    return c.json({ message: 'you got signed out' }, 200);
   }
 
-  const shortlinks = await urlStore.getAll();
-
-  return c.html(DashboardPage({ shortlinks, baseUrl: c.req.url.split('/').slice(0, 3).join('/') }));
+  return c.redirect('/admin/login');
 });
 
 // Create shortlink route
