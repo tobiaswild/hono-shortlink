@@ -72,6 +72,7 @@ Redirects to the original URL for the given shortlink code.
 ### Admin Dashboard
 
 Access the admin dashboard at `/admin` to:
+
 - View all shortlinks
 - Create new shortlinks (with optional custom codes)
 - Delete shortlinks

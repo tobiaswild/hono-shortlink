@@ -1,5 +1,5 @@
-import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
+import { Hono } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import * as z from 'zod/v4';
 import urlStore from './urlStore.js';
@@ -14,25 +14,26 @@ const sessions = new Map<string, { isAdmin: boolean; expires: number }>();
 // Middleware to check admin authentication
 const requireAdminAuth = async (c: any, next: any) => {
   const sessionId = getCookie(c, 'admin_session');
-  
+
   if (!sessionId || !sessions.has(sessionId)) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
-  
+
   const session = sessions.get(sessionId);
   if (!session || !session.isAdmin || session.expires < Date.now()) {
     sessions.delete(sessionId);
     setCookie(c, 'admin_session', '', { maxAge: 0, path: '/' });
     return c.json({ error: 'Session expired' }, 401);
   }
-  
+
   await next();
 };
 
 // Helper function to check if request is for HTML
 const wantsHtml = (c: any) => {
-  return c.req.header('Accept')?.includes('text/html') || 
-         c.req.header('User-Agent')?.includes('Mozilla');
+  return (
+    c.req.header('Accept')?.includes('text/html') || c.req.header('User-Agent')?.includes('Mozilla')
+  );
 };
 
 const app = new Hono();
@@ -41,19 +42,19 @@ const app = new Hono();
 app.post('/login', async (c) => {
   const body = await c.req.json();
   const { apiKey } = body;
-  
+
   if (apiKey !== ADMIN_API_KEY) {
     return c.json({ error: 'Invalid API key' }, 401);
   }
-  
+
   // Create session
   const sessionId = crypto.randomUUID();
-  const expires = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+  const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
   sessions.set(sessionId, { isAdmin: true, expires });
-  
+
   // Set session cookie
   setCookie(c, 'admin_session', sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
-  
+
   return c.json({ success: true });
 });
 
@@ -71,7 +72,7 @@ app.post('/logout', async (c) => {
 app.get('/', async (c) => {
   const sessionId = getCookie(c, 'admin_session');
   const isAuthenticated = sessionId && sessions.has(sessionId);
-  
+
   // If not authenticated and it's a browser request, show login page
   if (!isAuthenticated && wantsHtml(c)) {
     const html = `
@@ -218,15 +219,15 @@ app.get('/', async (c) => {
 </html>`;
     return c.html(html);
   }
-  
+
   // If not authenticated, return error
   if (!isAuthenticated) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
-  
+
   // If authenticated, show the dashboard
   const shortlinks = await urlStore.getAll();
-  
+
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -442,7 +443,9 @@ app.get('/', async (c) => {
                     </tr>
                 </thead>
                 <tbody>
-                    ${shortlinks.map(link => `
+                    ${shortlinks
+                      .map(
+                        (link) => `
                         <tr>
                             <td>${link.id}</td>
                             <td><span class="shortlink-code">${link.code}</span></td>
@@ -453,7 +456,9 @@ app.get('/', async (c) => {
                                 <button class="delete-btn" onclick="deleteShortlink('${link.code}')">Delete</button>
                             </td>
                         </tr>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </tbody>
             </table>
         </div>
@@ -558,21 +563,25 @@ app.get('/', async (c) => {
 app.post(
   '/create',
   requireAdminAuth,
-  zValidator('json', z.object({ 
-    url: z.url(),
-    customCode: z.string().length(6).optional()
-  }), (result, c) => {
-    if (!result.success) {
-      return c.json({ error: z.prettifyError(result.error) }, 400);
+  zValidator(
+    'json',
+    z.object({
+      url: z.url(),
+      customCode: z.string().length(6).optional(),
+    }),
+    (result, c) => {
+      if (!result.success) {
+        return c.json({ error: z.prettifyError(result.error) }, 400);
+      }
     }
-  }),
+  ),
   async (c) => {
     const body = c.req.valid('json');
     const { url, customCode } = body;
 
     try {
       let code: string;
-      
+
       if (customCode) {
         // Check if custom code already exists
         const exists = await urlStore.has(customCode);
@@ -599,19 +608,23 @@ app.post(
 app.delete(
   '/delete/:code',
   requireAdminAuth,
-  zValidator('param', z.object({
-    code: z.string().length(6)
-  }), (result, c) => {
-    if (!result.success) {
-      return c.json({ error: z.prettifyError(result.error) }, 400);
+  zValidator(
+    'param',
+    z.object({
+      code: z.string().length(6),
+    }),
+    (result, c) => {
+      if (!result.success) {
+        return c.json({ error: z.prettifyError(result.error) }, 400);
+      }
     }
-  }),
+  ),
   async (c) => {
     const { code } = c.req.valid('param');
 
     try {
       const deleted = await urlStore.delete(code);
-      
+
       if (!deleted) {
         return c.json({ error: 'Shortlink not found' }, 404);
       }
@@ -623,4 +636,4 @@ app.delete(
   }
 );
 
-export default app; 
+export default app;

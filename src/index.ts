@@ -10,9 +10,8 @@ import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
 import * as z from 'zod/v4';
-import './db/db.js';
-import urlStore from './urlStore.js';
 import admin from './admin.js';
+import urlStore from './urlStore.js';
 
 const app = new Hono();
 
