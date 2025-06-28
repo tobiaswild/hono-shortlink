@@ -6,6 +6,9 @@ import { cors } from 'hono/cors';
 import { showRoutes } from 'hono/dev';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
+import { getCookie, setCookie } from 'hono/cookie';
+import { requestId } from 'hono/request-id';
+import { secureHeaders } from 'hono/secure-headers';
 import * as z from 'zod/v4';
 import './db/db.js';
 import urlStore from './urlStore.js';
@@ -16,12 +19,22 @@ const app = new Hono();
 // Admin API key - in production, use environment variable
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'your-secret-admin-key';
 
-// Middleware to check admin API key
+// Simple session management
+const sessions = new Map<string, { isAdmin: boolean; expires: number }>();
+
+// Middleware to check admin authentication
 const requireAdminAuth = async (c: any, next: any) => {
-  const apiKey = c.req.header('X-Admin-Key') || c.req.query('key');
+  const sessionId = getCookie(c, 'admin_session');
   
-  if (apiKey !== ADMIN_API_KEY) {
+  if (!sessionId || !sessions.has(sessionId)) {
     return c.json({ error: 'Unauthorized' }, 401);
+  }
+  
+  const session = sessions.get(sessionId);
+  if (!session || !session.isAdmin || session.expires < Date.now()) {
+    sessions.delete(sessionId);
+    setCookie(c, 'admin_session', '', { maxAge: 0, path: '/' });
+    return c.json({ error: 'Session expired' }, 401);
   }
   
   await next();
@@ -33,39 +46,48 @@ const wantsHtml = (c: any) => {
          c.req.header('User-Agent')?.includes('Mozilla');
 };
 
+app.use(requestId());
+app.use(secureHeaders());
 app.use(logger());
 app.use(prettyJSON());
 app.use(cors());
 app.use(compress());
 
-app.post(
-  '/shorten',
-  zValidator('json', z.object({ url: z.url() }), (result, c) => {
-    if (!result.success) {
-      return c.text(z.prettifyError(result.error), 400);
-    }
-  }),
-  async (c) => {
-    const body = c.req.valid('json');
-
-    const url = body.url;
-
-    const code = await getCode();
-
-    await urlStore.set(code, url);
-
-    const shortUrl = `${c.req.url.split('/').slice(0, 3).join('/')}/${code}`;
-
-    return c.json({ short: shortUrl });
-  }
-);
-
 // Admin Dashboard Routes
-app.get('/admin', async (c) => {
-  const apiKey = c.req.header('X-Admin-Key') || c.req.query('key');
+app.post('/admin/login', async (c) => {
+  const body = await c.req.json();
+  const { apiKey } = body;
   
-  // If no API key provided and it's a browser request, show login page
-  if (!apiKey && wantsHtml(c)) {
+  if (apiKey !== ADMIN_API_KEY) {
+    return c.json({ error: 'Invalid API key' }, 401);
+  }
+  
+  // Create session
+  const sessionId = crypto.randomUUID();
+  const expires = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+  sessions.set(sessionId, { isAdmin: true, expires });
+  
+  // Set session cookie
+  setCookie(c, 'admin_session', sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
+  
+  return c.json({ success: true });
+});
+
+app.post('/admin/logout', async (c) => {
+  const sessionId = getCookie(c, 'admin_session');
+  if (sessionId) {
+    sessions.delete(sessionId);
+  }
+  setCookie(c, 'admin_session', '', { maxAge: 0, path: '/' });
+  return c.json({ success: true });
+});
+
+app.get('/admin', async (c) => {
+  const sessionId = getCookie(c, 'admin_session');
+  const isAuthenticated = sessionId && sessions.has(sessionId);
+  
+  // If not authenticated and it's a browser request, show login page
+  if (!isAuthenticated && wantsHtml(c)) {
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -179,16 +201,16 @@ app.get('/admin', async (c) => {
             const resultDiv = document.getElementById('loginResult');
             
             try {
-                const response = await fetch('/admin', {
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
                     headers: {
-                        'X-Admin-Key': apiKey
-                    }
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ apiKey }),
                 });
                 
                 if (response.ok) {
-                    // Store the API key and redirect to dashboard
-                    localStorage.setItem('adminApiKey', apiKey);
-                    window.location.href = '/admin?key=' + apiKey;
+                    window.location.href = '/admin';
                 } else {
                     resultDiv.innerHTML = \`
                         <div class="alert alert-error">
@@ -210,8 +232,8 @@ app.get('/admin', async (c) => {
     return c.html(html);
   }
   
-  // If API key is provided, check it
-  if (apiKey !== ADMIN_API_KEY) {
+  // If not authenticated, return error
+  if (!isAuthenticated) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
   
@@ -504,10 +526,12 @@ app.get('/admin', async (c) => {
             const resultDiv = document.getElementById('loginResult');
             
             try {
-                const response = await fetch('/admin', {
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
                     headers: {
-                        'X-Admin-Key': apiKey
-                    }
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ apiKey }),
                 });
                 
                 if (response.ok) {
@@ -557,7 +581,6 @@ app.get('/admin', async (c) => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Admin-Key': currentApiKey
                     },
                     body: JSON.stringify({ url, customCode: customCode || undefined }),
                 });
@@ -607,10 +630,7 @@ app.get('/admin', async (c) => {
         function deleteShortlink(code) {
             if (confirm('Are you sure you want to delete this shortlink?')) {
                 fetch('/admin/delete/' + code, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-Admin-Key': currentApiKey
-                    }
+                    method: 'DELETE'
                 })
                 .then(response => {
                     if (response.ok) {
@@ -623,6 +643,16 @@ app.get('/admin', async (c) => {
                     console.error('Error deleting shortlink:', error);
                     alert('An error occurred while deleting the shortlink');
                 });
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/admin/logout', { method: 'POST' });
+                window.location.href = '/admin';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                window.location.href = '/admin';
             }
         }
     </script>

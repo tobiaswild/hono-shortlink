@@ -65,29 +65,19 @@ pnpm run build
 
 ## API
 
-### POST /shorten
-
-Create a new shortlink.
-
-**Request:**
-
-```json
-{
-  "url": "https://example.com"
-}
-```
-
-**Response:**
-
-```json
-{
-  "short": "http://localhost:3000/abc123"
-}
-```
-
 ### GET /:code
 
 Redirects to the original URL for the given shortlink code.
+
+### Admin Dashboard
+
+Access the admin dashboard at `/admin` to:
+- View all shortlinks
+- Create new shortlinks (with optional custom codes)
+- Delete shortlinks
+- Copy shortlink URLs
+
+Authentication is required using an API key.
 
 ## Persistent Storage
 
