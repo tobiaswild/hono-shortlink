@@ -1,3 +1,3 @@
-import { shortlinkTable } from '../schema/shortlink.js';
+import { shortlinkTable } from '@/db/schema/shortlink.js';
 
 export type Shortlink = typeof shortlinkTable.$inferSelect;

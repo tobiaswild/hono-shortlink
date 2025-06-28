@@ -1,3 +1,4 @@
+import { env } from '@/config/env.js';
 import urlStore from '@/db/store/shortlink.js';
 import admin from '@/routes/admin.js';
 import ErrorPage from '@/templates/error.js';
@@ -113,7 +114,7 @@ showRoutes(app);
 const server = serve(
   {
     fetch: app.fetch,
-    port: 3000,
+    port: env.PORT,
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);

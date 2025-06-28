@@ -1,3 +1,4 @@
+import { env } from '@/config/env.js';
 import sessionStore from '@/db/store/session.js';
 import urlStore from '@/db/store/shortlink.js';
 import { requireAuth } from '@/middleware/auth.js';
@@ -13,7 +14,7 @@ import { Hono } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import * as z from 'zod/v4';
 
-const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'your-secret-admin-key';
+const ADMIN_API_KEY = env.ADMIN_API_KEY;
 
 const app = new Hono();
 
