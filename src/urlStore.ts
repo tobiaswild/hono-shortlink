@@ -1,6 +1,6 @@
+import { db } from '@/db/db.js';
+import { shortlinkTable } from '@/db/schema.js';
 import { eq } from 'drizzle-orm';
-import { db } from './db/db.js';
-import { shortlinkTable } from './db/schema.js';
 
 export default {
   async get(code: string) {

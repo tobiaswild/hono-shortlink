@@ -1,17 +1,17 @@
+import { requireAuth } from '@/middleware/auth.js';
+import { requireNoAuth } from '@/middleware/no-auth.js';
+import sessionStore from '@/sessionStore.js';
+import DashboardPage from '@/templates/dashboard.js';
+import LoginPage from '@/templates/login.js';
+import urlStore from '@/urlStore.js';
+import { getCode } from '@/util/code.js';
+import { wantsHtml } from '@/util/html.js';
+import { SESSION_COOKIE } from '@/util/session.js';
+import { getBaseUrl } from '@/util/url.js';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import * as z from 'zod/v4';
-import { requireAuth } from './middleware/auth.js';
-import { requireNoAuth } from './middleware/no-auth.js';
-import sessionStore from './sessionStore.js';
-import DashboardPage from './templates/dashboard.js';
-import LoginPage from './templates/login.js';
-import urlStore from './urlStore.js';
-import { getCode } from './util/code.js';
-import { wantsHtml } from './util/html.js';
-import { SESSION_COOKIE } from './util/session.js';
-import { getBaseUrl } from './util/url.js';
 
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'your-secret-admin-key';
 

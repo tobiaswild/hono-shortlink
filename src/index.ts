@@ -1,3 +1,8 @@
+import admin from '@/routes/admin.js';
+import ErrorPage from '@/templates/error.js';
+import NotFoundPage from '@/templates/not-found.js';
+import urlStore from '@/urlStore.js';
+import { wantsHtml } from '@/util/html.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
@@ -8,11 +13,6 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
-import admin from './admin.js';
-import ErrorPage from './templates/error.js';
-import NotFoundPage from './templates/not-found.js';
-import urlStore from './urlStore.js';
-import { wantsHtml } from './util/html.js';
 
 const app = new Hono();
 

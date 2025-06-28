@@ -1,5 +1,5 @@
 import { Style } from 'hono/css';
-import { styles } from '../styles/main.js';
+import { styles } from '@/styles/main.js';
 
 export default function Layout(props: { title: string; children: any }) {
   return (

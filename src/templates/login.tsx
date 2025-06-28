@@ -1,5 +1,5 @@
 import { cx } from 'hono/css';
-import { styles } from '../styles/main.js';
+import { styles } from '@/styles/main.js';
 import Layout from './layout.js';
 
 export default function LoginPage() {

@@ -9,7 +9,12 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "outDir": "./dist",
-    "moduleResolution": "nodenext"
+    "moduleResolution": "nodenext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+    
   },
   "exclude": ["node_modules"]
 }

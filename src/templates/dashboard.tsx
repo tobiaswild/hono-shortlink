@@ -1,6 +1,6 @@
 import { cx } from 'hono/css';
-import type { Shortlink } from '../db/schema.js';
-import { styles } from '../styles/main.js';
+import type { Shortlink } from '@/db/schema.js';
+import { styles } from '@/styles/main.js';
 import Layout from './layout.js';
 
 export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl: string }) {

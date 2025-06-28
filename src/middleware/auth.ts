@@ -1,8 +1,8 @@
 import type { Context, Next } from 'hono';
 import { deleteCookie, getCookie } from 'hono/cookie';
-import sessionStore from '../sessionStore.js';
-import { wantsHtml } from '../util/html.js';
-import { SESSION_COOKIE } from '../util/session.js';
+import sessionStore from '@/sessionStore.js';
+import { wantsHtml } from '@/util/html.js';
+import { SESSION_COOKIE } from '@/util/session.js';
 
 export const requireAuth = async (c: Context, next: Next) => {
   const sessionId = getCookie(c, SESSION_COOKIE);
