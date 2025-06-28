@@ -20,4 +20,11 @@ export default {
       .where(eq(shortlinkTable.code, code));
     return result.length > 0;
   },
+  async getAll() {
+    return await db.select().from(shortlinkTable).orderBy(shortlinkTable.id);
+  },
+  async delete(code: string) {
+    const result = await db.delete(shortlinkTable).where(eq(shortlinkTable.code, code));
+    return result.rowsAffected > 0;
+  },
 };
