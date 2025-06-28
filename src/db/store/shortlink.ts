@@ -1,5 +1,5 @@
 import { db } from '@/db/db.js';
-import { shortlinkTable } from '@/db/schema.js';
+import { shortlinkTable } from '@/db/schema/shortlink.js';
 import { eq } from 'drizzle-orm';
 
 export default {

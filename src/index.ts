@@ -1,7 +1,7 @@
+import urlStore from '@/db/store/shortlink.js';
 import admin from '@/routes/admin.js';
 import ErrorPage from '@/templates/error.js';
 import NotFoundPage from '@/templates/not-found.js';
-import urlStore from '@/urlStore.js';
 import { wantsHtml } from '@/util/html.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';

@@ -226,4 +226,7 @@ export const styles = {
     flex-direction: row;
     gap: 0.5rem;
   `,
+  formReset: css`
+    margin-bottom: 0;
+  `,
 };

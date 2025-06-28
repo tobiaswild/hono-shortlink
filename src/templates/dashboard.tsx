@@ -1,7 +1,7 @@
-import { cx } from 'hono/css';
-import type { Shortlink } from '@/db/schema.js';
+import type { Shortlink } from '@/db/types/shortlink.js';
 import { styles } from '@/styles/main.js';
-import Layout from './layout.js';
+import Layout from '@/templates/layout.js';
+import { cx } from 'hono/css';
 
 export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl: string }) {
   return (
@@ -10,7 +10,7 @@ export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl:
         <div class={styles.header}>
           <h1 class={styles.headerH1}>🔗 Shortlink Admin Dashboard</h1>
           <p>Manage your shortlinks and create new ones</p>
-          <form method="post" action="/admin/logout">
+          <form method="post" action="/admin/logout" class={styles.formReset}>
             <button type="submit" class={cx(styles.btn, styles.btnDanger)}>
               Logout
             </button>
@@ -97,15 +97,12 @@ export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl:
                     >
                       Open
                     </a>
-                    <button
-                      class={cx(styles.btn, styles.copyBtn)}
-                      onclick={`copyToClipboard('${props.baseUrl}/${link.code}')`}
-                    >
-                      Copy
-                    </button>
-                    <button onclick={`deleteShortlink('${link.code}')`}>Delete</button>
 
-                    <form method="post" action={`/admin/delete/${link.code}`}>
+                    <form
+                      method="post"
+                      action={`/admin/delete/${link.code}`}
+                      class={styles.formReset}
+                    >
                       <button type="submit" class={cx(styles.btn, styles.deleteBtn)}>
                         Delete
                       </button>

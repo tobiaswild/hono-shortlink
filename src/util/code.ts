@@ -1,4 +1,4 @@
-import urlStore from '@/urlStore.js';
+import urlStore from '@/db/store/shortlink.js';
 
 export async function getCode() {
   let code;
