@@ -81,6 +81,7 @@ app.get('/', async (c) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shortlink Admin Login</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico">
     <style>
         * {
             margin: 0;
@@ -233,6 +234,7 @@ app.get('/', async (c) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shortlink Admin Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico">
     <style>
         * {
             margin: 0;

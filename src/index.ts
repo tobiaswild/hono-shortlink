@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { compress } from 'hono/compress';
@@ -21,6 +22,10 @@ app.use(logger());
 app.use(prettyJSON());
 app.use(cors());
 app.use(compress());
+
+// Serve static files
+app.use('/static/*', serveStatic({ root: './' }));
+app.use('/favicon.ico', serveStatic({ path: './static/favicon.svg' }));
 
 // Mount admin routes
 app.route('/admin', admin);
