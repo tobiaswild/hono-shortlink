@@ -130,17 +130,53 @@ app.get('/', async (c) => {
             font-size: 16px;
         }
         .btn {
-            background: #2563eb;
-            color: white;
-            padding: 12px 24px;
+            padding: 4px 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            width: 100%;
+            font-size: 12px;
+            color: white;
         }
         .btn:hover {
+            opacity: 0.9;
+        }
+        .btn-primary {
+            background: #2563eb;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        .btn-full {
+            width: 100%;
+        }
+        .btn-danger {
+            background: #dc2626;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .btn-logout {
+            margin-top: 10px;
+        }
+        .copy-btn {
+            background: #059669;
+        }
+        .copy-btn:hover {
+            background: #047857;
+        }
+        .delete-btn {
+            background: #dc2626;
+        }
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+        .open-btn {
+            background: #2563eb;
+        }
+        .open-btn:hover {
             background: #1d4ed8;
         }
         .alert {
@@ -170,7 +206,7 @@ app.get('/', async (c) => {
                     <label for="apiKey">API Key:</label>
                     <input type="password" id="apiKey" name="apiKey" placeholder="Enter your admin API key" required>
                 </div>
-                <button type="submit" class="btn">Login</button>
+                <button type="submit" class="btn btn-primary btn-full">Login</button>
             </form>
             <div id="loginResult"></div>
             <div class="info">
@@ -314,16 +350,53 @@ app.get('/', async (c) => {
             font-size: 16px;
         }
         .btn {
-            background: #2563eb;
-            color: white;
-            padding: 12px 24px;
+            padding: 4px 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 12px;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn-primary {
+            background: #2563eb;
+            padding: 12px 24px;
             font-size: 16px;
             font-weight: 500;
         }
-        .btn:hover {
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        .btn-full {
+            width: 100%;
+        }
+        .btn-danger {
+            background: #dc2626;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .btn-logout {
+            margin-top: 10px;
+        }
+        .copy-btn {
+            background: #059669;
+        }
+        .copy-btn:hover {
+            background: #047857;
+        }
+        .delete-btn {
+            background: #dc2626;
+        }
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+        .open-btn {
+            background: #2563eb;
+        }
+        .open-btn:hover {
             background: #1d4ed8;
         }
         .table {
@@ -357,31 +430,6 @@ app.get('/', async (c) => {
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .copy-btn {
-            background: #059669;
-            color: white;
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .copy-btn:hover {
-            background: #047857;
-        }
-        .delete-btn {
-            background: #dc2626;
-            color: white;
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: 5px;
-        }
-        .delete-btn:hover {
-            background: #b91c1c;
-        }
         .alert {
             padding: 12px;
             border-radius: 4px;
@@ -404,7 +452,7 @@ app.get('/', async (c) => {
         <div class="header">
             <h1>🔗 Shortlink Admin Dashboard</h1>
             <p>Manage your shortlinks and create new ones</p>
-            <button onclick="logout()" class="btn" style="background: #dc2626; margin-top: 10px;">Logout</button>
+            <button onclick="logout()" class="btn btn-danger btn-logout">Logout</button>
         </div>
 
         <div class="stats">
@@ -425,7 +473,7 @@ app.get('/', async (c) => {
                     <label for="customCode">Custom Code (optional, 6 characters):</label>
                     <input type="text" id="customCode" name="customCode" placeholder="Leave empty for auto-generated" maxlength="6" pattern="[A-Za-z0-9]{6}">
                 </div>
-                <button type="submit" class="btn">Create Shortlink</button>
+                <button type="submit" class="btn btn-primary">Create Shortlink</button>
             </form>
             <div id="createResult"></div>
         </div>
@@ -452,8 +500,9 @@ app.get('/', async (c) => {
                             <td class="shortlink-url" title="${link.url}">${link.url}</td>
                             <td class="shortlink-url" title="${c.req.url.split('/').slice(0, 3).join('/')}/${link.code}">${c.req.url.split('/').slice(0, 3).join('/')}/${link.code}</td>
                             <td>
-                                <button class="copy-btn" onclick="copyToClipboard('${c.req.url.split('/').slice(0, 3).join('/')}/${link.code}')">Copy</button>
-                                <button class="delete-btn" onclick="deleteShortlink('${link.code}')">Delete</button>
+                                <button class="btn open-btn" onclick="openShortlink('${c.req.url.split('/').slice(0, 3).join('/')}/${link.code}')">Open</button>
+                                <button class="btn copy-btn" onclick="copyToClipboard('${c.req.url.split('/').slice(0, 3).join('/')}/${link.code}')">Copy</button>
+                                <button class="btn delete-btn" onclick="deleteShortlink('${link.code}')">Delete</button>
                             </td>
                         </tr>
                     `
@@ -541,6 +590,10 @@ app.get('/', async (c) => {
                     alert('An error occurred while deleting the shortlink');
                 });
             }
+        }
+
+        function openShortlink(url) {
+            window.open(url, '_blank');
         }
 
         async function logout() {
