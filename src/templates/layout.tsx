@@ -1,8 +1,9 @@
 import { APP_CONFIG } from '@/config/app.js';
 import { styles } from '@/styles/main.js';
 import { Style } from 'hono/css';
+import type { PropsWithChildren } from 'hono/jsx';
 
-export default function Layout(props: { title: string; children: any }) {
+export default function Layout(props: PropsWithChildren<{ title: string }>) {
   return (
     <html lang="en">
       <head>
