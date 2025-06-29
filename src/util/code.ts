@@ -2,7 +2,7 @@ import { APP_CONFIG } from '@/config/app.js';
 import urlStore from '@/db/store/shortlink.js';
 
 export async function getCode() {
-  let code;
+  let code: string;
   do {
     code = generateCode();
   } while (await urlStore.has(code));

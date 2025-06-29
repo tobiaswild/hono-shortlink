@@ -90,7 +90,7 @@ app.post('/register', async (c) => {
   }
 
   const hashedPassword = await hashPassword(password);
-  const result = await userStore.create(username, email, hashedPassword);
+  const _result = await userStore.create(username, email, hashedPassword);
 
   // Get the created user to get their ID
   const newUser = await userStore.getByUsername(username);
