@@ -10,6 +10,7 @@
 
 # deps
 node_modules/
+dist/
 
 # env
 .env
@@ -31,3 +32,7 @@ lerna-debug.log*
 data.json
 
 local.db
+*.db
+shortlink.db
+cookies.txt
+*_cookies.txt
