@@ -78,7 +78,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate database migrations
-        run: pnpm db:generate --check
+        run: pnpm drizzle-kit check
 
   security:
     name: Security Audit
