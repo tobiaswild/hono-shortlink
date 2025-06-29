@@ -27,7 +27,6 @@ A multi-user URL shortener service built with [Hono](https://hono.dev/) and Node
 
    ```env
    DB_FILE_NAME=shortlink.db
-   SECRET_KEY=your-secret-key-here
    PORT=3000
    SESSION_COOKIE=session
    ```

@@ -8,9 +8,6 @@ Create a `.env` file in the root directory with the following variables:
 # Database file name (SQLite)
 DB_FILE_NAME=shortlink.db
 
-# Secret key for session security (generate a random string)
-SECRET_KEY=your-secret-key-here
-
 # Port for the server (optional, defaults to 3000)
 PORT=3000
 
