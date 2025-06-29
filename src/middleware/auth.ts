@@ -1,4 +1,4 @@
-import { env } from '@/config/env.js';
+import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
 import userStore from '@/db/store/user.js';
 import { wantsHtml } from '@/util/html.js';
@@ -7,7 +7,7 @@ import type { Context, Next } from 'hono';
 import { deleteCookie, getCookie } from 'hono/cookie';
 
 export const requireAuth = async (c: Context, next: Next) => {
-  const sessionId = getCookie(c, env.SESSION_COOKIE);
+  const sessionId = getCookie(c, APP_CONFIG.SESSION_COOKIE);
   if (!sessionId) {
     if (!wantsHtml(c)) {
       return c.json(
@@ -42,7 +42,7 @@ export const requireAuth = async (c: Context, next: Next) => {
   const session = await sessionStore.get(sessionId);
   if (!session) {
     sessionStore.delete(sessionId);
-    deleteCookie(c, env.SESSION_COOKIE);
+    deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
 
     if (!wantsHtml(c)) {
       return c.json(
@@ -60,7 +60,7 @@ export const requireAuth = async (c: Context, next: Next) => {
 
   if (session.expires < Date.now()) {
     sessionStore.delete(sessionId);
-    deleteCookie(c, env.SESSION_COOKIE);
+    deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
 
     if (!wantsHtml(c)) {
       return c.json(
@@ -80,7 +80,7 @@ export const requireAuth = async (c: Context, next: Next) => {
   const user = await userStore.getById(session.userId);
   if (!user) {
     sessionStore.delete(sessionId);
-    deleteCookie(c, env.SESSION_COOKIE);
+    deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
 
     if (!wantsHtml(c)) {
       return c.json(

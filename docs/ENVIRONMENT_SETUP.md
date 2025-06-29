@@ -10,9 +10,6 @@ DB_FILE_NAME=shortlink.db
 
 # Port for the server (optional, defaults to 3000)
 PORT=3000
-
-# Session cookie name (optional, defaults to 'session')
-SESSION_COOKIE=session
 ```
 
 ## Database Setup

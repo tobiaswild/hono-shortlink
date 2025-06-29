@@ -1,9 +1,8 @@
-import { env } from '@/config/env.js';
+import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
-import urlStore from '@/db/store/shortlink.js';
+import shortlinkStore from '@/db/store/shortlink.js';
 import userStore from '@/db/store/user.js';
 import { requireAuth } from '@/middleware/auth.js';
-import { requireNoAuth } from '@/middleware/no-auth.js';
 import DashboardPage from '@/templates/dashboard.js';
 import LoginPage from '@/templates/login.js';
 import RegisterPage from '@/templates/register.js';
@@ -11,366 +10,257 @@ import { getCode } from '@/util/code.js';
 import { wantsHtml } from '@/util/html.js';
 import { hashPassword, verifyPassword } from '@/util/password.js';
 import { getBaseUrl } from '@/util/url.js';
-import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
-import * as z from 'zod/v4';
 
 const app = new Hono();
 
-app.get('/dashboard', requireAuth, async (c) => {
-  const user = c.get('user');
-  const shortlinks = await urlStore.getAllByUserId(user.id);
-
-  if (!wantsHtml(c)) {
-    return c.json(
-      {
-        success: true,
-        code: 200,
-        data: shortlinks,
-      },
-      200
-    );
-  }
-
-  return c.html(DashboardPage({ shortlinks, baseUrl: getBaseUrl(c), user }));
-});
-
-app.get('/login', requireNoAuth, (c) => {
-  if (!wantsHtml(c)) {
-    return c.json(
-      {
-        success: false,
-        code: 400,
-        message: 'login via post',
-      },
-      400
-    );
-  }
-
+// Login page
+app.get('/login', (c) => {
   return c.html(LoginPage());
 });
 
-app.get('/register', requireNoAuth, (c) => {
-  if (!wantsHtml(c)) {
-    return c.json(
-      {
-        success: false,
-        code: 400,
-        message: 'register via post',
-      },
-      400
-    );
-  }
-
+// Register page
+app.get('/register', (c) => {
   return c.html(RegisterPage());
 });
 
-app.post('/register', requireNoAuth, async (c) => {
+// Login handler
+app.post('/login', async (c) => {
   const formData = await c.req.formData();
-
   const username = formData.get('username') as string;
-  const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  if (!username || !email || !password) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 400,
-          error: 'All fields are required',
-        },
-        400
-      );
-    }
-
-    return c.redirect('/admin/register');
+  if (!username || !password) {
+    return c.html(LoginPage());
   }
 
-  // Check if username already exists
+  const user = await userStore.getByUsername(username);
+  if (!user) {
+    return c.html(LoginPage());
+  }
+
+  const isValidPassword = await verifyPassword(password, user.passwordHash);
+  if (!isValidPassword) {
+    return c.html(LoginPage());
+  }
+
+  const sessionId = crypto.randomUUID();
+  const expires = Date.now() + APP_CONFIG.SESSION_MAX_AGE;
+  await sessionStore.set(sessionId, user.id, expires);
+
+  setCookie(c, APP_CONFIG.SESSION_COOKIE, sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: APP_CONFIG.SESSION_MAX_AGE / 1000, // Convert to seconds
+  });
+
+  return c.redirect('/admin');
+});
+
+// Register handler
+app.post('/register', async (c) => {
+  const formData = await c.req.formData();
+  const username = formData.get('username') as string;
+  const password = formData.get('password') as string;
+  const confirmPassword = formData.get('confirmPassword') as string;
+
+  if (!username || !password || !confirmPassword) {
+    return c.html(RegisterPage());
+  }
+
+  if (password !== confirmPassword) {
+    return c.html(RegisterPage());
+  }
+
+  if (password.length < 6) {
+    return c.html(RegisterPage());
+  }
+
   const existingUser = await userStore.getByUsername(username);
   if (existingUser) {
+    return c.html(RegisterPage());
+  }
+
+  const hashedPassword = await hashPassword(password);
+  const result = await userStore.create(username, `${username}@example.com`, hashedPassword);
+
+  // Get the created user to get their ID
+  const newUser = await userStore.getByUsername(username);
+  if (!newUser) {
+    return c.html(RegisterPage());
+  }
+
+  const sessionId = crypto.randomUUID();
+  const expires = Date.now() + APP_CONFIG.SESSION_MAX_AGE;
+  await sessionStore.set(sessionId, newUser.id, expires);
+
+  setCookie(c, APP_CONFIG.SESSION_COOKIE, sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: APP_CONFIG.SESSION_MAX_AGE / 1000, // Convert to seconds
+  });
+
+  return c.redirect('/admin');
+});
+
+// Logout handler
+app.post('/logout', requireAuth, async (c) => {
+  const sessionId = getCookie(c, APP_CONFIG.SESSION_COOKIE);
+  if (sessionId) {
+    await sessionStore.delete(sessionId);
+  }
+
+  setCookie(c, APP_CONFIG.SESSION_COOKIE, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+  });
+
+  return c.redirect('/admin/login');
+});
+
+// Dashboard
+app.get('/', requireAuth, async (c) => {
+  const user = c.get('user');
+  const shortlinks = await shortlinkStore.getAllByUserId(user.id);
+
+  return c.html(
+    DashboardPage({
+      shortlinks,
+      baseUrl: getBaseUrl(c),
+      user,
+    })
+  );
+});
+
+// Create shortlink
+app.post('/shortlinks', requireAuth, async (c) => {
+  const user = c.get('user');
+  const formData = await c.req.formData();
+  const url = formData.get('url') as string;
+
+  if (!url) {
     if (!wantsHtml(c)) {
       return c.json(
         {
           success: false,
           code: 400,
-          error: 'Username already exists',
+          message: 'URL is required',
         },
         400
       );
     }
 
-    return c.redirect('/admin/register');
+    return c.html(
+      DashboardPage({
+        shortlinks: await shortlinkStore.getAllByUserId(user.id),
+        baseUrl: getBaseUrl(c),
+        user,
+      })
+    );
   }
 
-  // Check if email already exists
-  const existingEmail = await userStore.getByEmail(email);
-  if (existingEmail) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 400,
-          error: 'Email already exists',
-        },
-        400
-      );
-    }
+  let code: string;
+  let attempts = 0;
+  const maxAttempts = 10;
 
-    return c.redirect('/admin/register');
-  }
+  do {
+    code = await getCode();
+    attempts++;
+  } while ((await shortlinkStore.has(code)) && attempts < maxAttempts);
 
-  try {
-    const passwordHash = await hashPassword(password);
-    await userStore.create(username, email, passwordHash);
-
-    if (!wantsHtml(c)) {
-      return c.json({
-        success: true,
-        code: 200,
-        message: 'User created successfully',
-      });
-    }
-
-    return c.redirect('/admin/login');
-  } catch (error) {
+  if (attempts >= maxAttempts) {
     if (!wantsHtml(c)) {
       return c.json(
         {
           success: false,
           code: 500,
-          error: 'Failed to create user',
+          message: 'Failed to generate unique code',
         },
         500
       );
     }
 
-    return c.redirect('/admin/register');
-  }
-});
-
-app.post('/login', requireNoAuth, async (c) => {
-  const formData = await c.req.formData();
-
-  const username = formData.get('username') as string;
-  const password = formData.get('password') as string;
-
-  if (!username || !password) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 400,
-          error: 'Username and password are required',
-        },
-        400
-      );
-    }
-
-    return c.redirect('/admin/login');
+    return c.html(
+      DashboardPage({
+        shortlinks: await shortlinkStore.getAllByUserId(user.id),
+        baseUrl: getBaseUrl(c),
+        user,
+      })
+    );
   }
 
-  const user = await userStore.getByUsername(username);
-  if (!user) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          error: 'Invalid credentials',
-        },
-        401
-      );
-    }
-
-    return c.redirect('/admin/login');
-  }
-
-  const isValidPassword = await verifyPassword(password, user.passwordHash);
-  if (!isValidPassword) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          error: 'Invalid credentials',
-        },
-        401
-      );
-    }
-
-    return c.redirect('/admin/login');
-  }
-
-  const sessionId = crypto.randomUUID();
-  const expires = Date.now() + 24 * 60 * 60 * 1000;
-
-  sessionStore.set(sessionId, user.id, expires);
-
-  setCookie(c, env.SESSION_COOKIE, sessionId, { maxAge: 86400, path: '/', sameSite: 'Lax' });
+  await shortlinkStore.set(code, url, user.id);
 
   if (!wantsHtml(c)) {
     return c.json({
       success: true,
-      code: 200,
-      message: 'logged in',
+      data: {
+        code,
+        url,
+        shortUrl: `${getBaseUrl(c)}/${code}`,
+      },
     });
   }
 
-  return c.redirect('/admin/dashboard');
+  return c.redirect('/admin');
 });
 
-app.post('/logout', requireAuth, async (c) => {
-  const sessionId = getCookie(c, env.SESSION_COOKIE);
-  if (sessionId) {
-    sessionStore.delete(sessionId);
-  }
-  setCookie(c, env.SESSION_COOKIE, '', { maxAge: 0, path: '/' });
+// Delete shortlink
+app.delete('/shortlinks/:code', requireAuth, async (c) => {
+  const user = c.get('user');
+  const code = c.req.param('code');
 
-  if (!wantsHtml(c)) {
-    return c.json({ success: true, code: 200, message: 'you got signed out' }, 200);
+  const shortlinkUrl = await shortlinkStore.get(code);
+  if (!shortlinkUrl) {
+    return c.json(
+      {
+        success: false,
+        code: 404,
+        message: 'Shortlink not found',
+      },
+      404
+    );
   }
 
-  return c.redirect('/admin/login');
+  // For now, we'll delete without checking ownership since the store doesn't return userId
+  // In a real app, you'd want to modify the store to return full shortlink objects
+  const deleted = await shortlinkStore.deleteByUserId(code, user.id);
+  if (!deleted) {
+    return c.json(
+      {
+        success: false,
+        code: 403,
+        message: 'Forbidden',
+      },
+      403
+    );
+  }
+
+  return c.json({
+    success: true,
+    message: 'Shortlink deleted',
+  });
 });
 
-app.post(
-  '/create',
-  requireAuth,
-  zValidator(
-    'form',
-    z.object({
-      url: z.url(),
-      customCode: z.string().length(6).optional(),
-    }),
-    (result, c) => {
-      if (!result.success) {
-        if (!wantsHtml(c)) {
-          return c.json(
-            {
-              success: false,
-              code: 400,
-              error: JSON.parse(result.error.message),
-            },
-            400
-          );
-        }
+// API endpoint to get user's shortlinks
+app.get('/shortlinks', requireAuth, async (c) => {
+  const user = c.get('user');
+  const shortlinks = await shortlinkStore.getAllByUserId(user.id);
 
-        return c.redirect('/admin/dashboard');
-      }
-    }
-  ),
-  async (c) => {
-    const body = c.req.valid('form');
-    const { url, customCode } = body;
-    const user = c.get('user');
-
-    try {
-      let code: string;
-
-      if (customCode) {
-        const exists = await urlStore.has(customCode);
-
-        if (exists) {
-          if (!wantsHtml(c)) {
-            return c.json(
-              {
-                success: false,
-                code: 400,
-                error: 'Custom code already exists',
-              },
-              400
-            );
-          }
-
-          return c.redirect('/admin/dashboard');
-        }
-        code = customCode;
-      } else {
-        code = await getCode();
-      }
-
-      await urlStore.set(code, url, user.id);
-
-      const shortUrl = `${getBaseUrl(c)}/${code}`;
-
-      if (!wantsHtml(c)) {
-        return c.json({ success: true, code: 200, short: shortUrl });
-      }
-
-      return c.redirect('/admin/dashboard');
-    } catch (error) {
-      if (!wantsHtml(c)) {
-        return c.json({ success: false, code: 500, error: 'Failed to create shortlink' }, 500);
-      }
-
-      return c.redirect('/admin/dashboard');
-    }
-  }
-);
-
-app.post(
-  '/delete/:code',
-  requireAuth,
-  zValidator(
-    'param',
-    z.object({
-      code: z.string(),
-    }),
-    (result, c) => {
-      if (!result.success) {
-        if (!wantsHtml(c)) {
-          return c.json(
-            {
-              success: false,
-              code: 400,
-              error: JSON.parse(result.error.message),
-            },
-            400
-          );
-        }
-
-        return c.redirect('/admin/dashboard');
-      }
-    }
-  ),
-  async (c) => {
-    const { code } = c.req.valid('param');
-    const user = c.get('user');
-
-    try {
-      const deleted = await urlStore.deleteByUserId(code, user.id);
-
-      if (!deleted) {
-        if (!wantsHtml(c)) {
-          return c.json(
-            {
-              success: false,
-              code: 404,
-              error: 'Shortlink not found or not owned by you',
-            },
-            404
-          );
-        }
-
-        return c.redirect('/admin/dashboard');
-      }
-
-      if (!wantsHtml(c)) {
-        return c.json({ success: true, code: 200, message: 'Shortlink deleted' });
-      }
-
-      return c.redirect('/admin/dashboard');
-    } catch (error) {
-      if (!wantsHtml(c)) {
-        return c.json({ success: false, code: 500, error: 'Failed to delete shortlink' }, 500);
-      }
-
-      return c.redirect('/admin/dashboard');
-    }
-  }
-);
+  return c.json({
+    success: true,
+    data: shortlinks.map((link: any) => ({
+      code: link.code,
+      url: link.url,
+      shortUrl: `${getBaseUrl(c)}/${link.code}`,
+      createdAt: link.createdAt,
+    })),
+  });
+});
 
 export default app;

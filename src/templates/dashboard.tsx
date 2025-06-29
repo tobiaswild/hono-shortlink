@@ -9,10 +9,10 @@ export default function DashboardPage(props: {
   user: { username: string; email: string };
 }) {
   return (
-    <Layout title="Shortlink Admin Dashboard">
+    <Layout title="Admin Dashboard">
       <div class={styles.container}>
         <div class={styles.header}>
-          <h1 class={styles.headerH1}>🔗 Shortlink Admin Dashboard</h1>
+          <h1 class={styles.headerH1}>🔗 Admin Dashboard</h1>
           <p>Welcome, {props.user.username}! Manage your shortlinks and create new ones</p>
           <div class="flex gap-2">
             <span class="text-sm text-gray-600">Logged in as: {props.user.email}</span>
@@ -33,7 +33,7 @@ export default function DashboardPage(props: {
 
         <div class={styles.section}>
           <h2 class={styles.sectionH2}>➕ Create New Shortlink</h2>
-          <form id="createForm" method="post" action="/admin/create">
+          <form id="createForm" method="post" action="/admin/shortlinks">
             <div class={styles.formGroup}>
               <label for="url" class={styles.formGroupLabel}>
                 Target URL:
@@ -105,15 +105,13 @@ export default function DashboardPage(props: {
                       Open
                     </a>
 
-                    <form
-                      method="post"
-                      action={`/admin/delete/${link.code}`}
-                      class={styles.formReset}
+                    <button
+                      type="button"
+                      class={cx(styles.btn, styles.deleteBtn)}
+                      onclick={`deleteShortlink('${link.code}')`}
                     >
-                      <button type="submit" class={cx(styles.btn, styles.deleteBtn)}>
-                        Delete
-                      </button>
-                    </form>
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -121,6 +119,27 @@ export default function DashboardPage(props: {
           </table>
         </div>
       </div>
+
+      <script>
+        {`
+          async function deleteShortlink(code) {
+            if (confirm('Are you sure you want to delete this shortlink?')) {
+              try {
+                const response = await fetch(\`/admin/shortlinks/\${code}\`, {
+                  method: 'DELETE',
+                });
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  alert('Failed to delete shortlink');
+                }
+              } catch (error) {
+                alert('Error deleting shortlink');
+              }
+            }
+          }
+        `}
+      </script>
     </Layout>
   );
 }

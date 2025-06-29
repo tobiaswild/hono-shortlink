@@ -4,7 +4,7 @@ import Layout from './layout.js';
 
 export default function LoginPage() {
   return (
-    <Layout title="Shortlink Admin Login">
+    <Layout title="Admin Login">
       <div class={styles.loginContainer}>
         <div class={styles.loginForm}>
           <h2 class={styles.loginFormH2}>🔐 Admin Login</h2>

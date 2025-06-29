@@ -4,7 +4,7 @@ import Layout from './layout.js';
 
 export default function RegisterPage() {
   return (
-    <Layout title="Register - Shortlink Admin">
+    <Layout title="Register">
       <div class={styles.loginContainer}>
         <div class={styles.loginForm}>
           <h2 class={styles.loginFormH2}>📝 Register</h2>
@@ -46,6 +46,19 @@ export default function RegisterPage() {
                 required
                 class={styles.formGroupInput}
                 placeholder="Password"
+              />
+            </div>
+            <div class={styles.formGroup}>
+              <label for="confirmPassword" class={styles.formGroupLabel}>
+                Confirm Password:
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                class={styles.formGroupInput}
+                placeholder="Confirm Password"
               />
             </div>
             <button type="submit" class={cx(styles.btn, styles.btnPrimary, styles.btnFull)}>
