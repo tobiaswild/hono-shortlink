@@ -1,167 +1,72 @@
-# Environment Variables with Zod
+# Environment Setup
 
-This project uses [Zod](https://zod.dev/) to parse and validate environment variables from a `.env` file. This provides type safety, runtime validation, and better error messages.
+## Required Environment Variables
 
-## Setup
-
-1. **Create a `.env` file** in your project root based on the `.env.example` file:
-
-```bash
-cp .env.example .env
-```
-
-2. **Fill in your actual values** in the `.env` file:
+Create a `.env` file in the root directory with the following variables:
 
 ```env
-# Database Configuration
+# Database file name (SQLite)
 DB_FILE_NAME=shortlink.db
 
-# Admin Configuration
-ADMIN_API_KEY=your-actual-secret-key-here
+# Secret key for session security (generate a random string)
+SECRET_KEY=your-secret-key-here
 
-# Server Configuration (optional)
+# Port for the server (optional, defaults to 3000)
 PORT=3000
+
+# Session cookie name (optional, defaults to 'session')
+SESSION_COOKIE=session
 ```
 
-## How It Works
+## Database Migration
 
-### 1. Environment Schema Definition
+After setting up your environment variables, run the database migration to set up the multi-user schema:
 
-The schema is defined in `src/config/env.ts`:
-
-```typescript
-const envSchema = z.object({
-  DB_FILE_NAME: z.string().min(1, 'Database file name is required'),
-  ADMIN_API_KEY: z.string().min(1, 'Admin API key is required'),
-  PORT: z
-    .string()
-    .transform((val) => parseInt(val, 10))
-    .pipe(z.number().min(1).max(65535))
-    .default('3000'),
-});
+```bash
+pnpm migrate
 ```
 
-### 2. Validation and Parsing
+This will:
 
-The environment variables are automatically validated when the application starts:
+- Create the user table for multi-user support
+- Update the session and shortlink tables to include user relationships
+- Create a default admin user with credentials:
+  - Username: `admin`
+  - Email: `admin@example.com`
+  - Password: `admin123`
 
-```typescript
-const parseEnv = () => {
-  try {
-    return envSchema.parse(process.env);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error('❌ Invalid environment variables:');
-      error.errors.forEach((err) => {
-        console.error(`  ${err.path.join('.')}: ${err.message}`);
-      });
-      process.exit(1);
-    }
-    throw error;
-  }
-};
-```
+**Important**: Change the default admin credentials after first login for security.
 
-### 3. Usage in Your Code
+## Running the Application
 
-Import and use the validated environment variables:
+1. Install dependencies:
 
-```typescript
-import { env } from './config/env.js';
+   ```bash
+   pnpm install
+   ```
 
-// Type-safe access to environment variables
-console.log(`Server running on port ${env.PORT}`);
-console.log(`Database: ${env.DB_FILE_NAME}`);
-```
+2. Run the migration:
 
-## Zod Schema Features Used
+   ```bash
+   pnpm migrate
+   ```
 
-### Required Fields
+3. Start the development server:
 
-```typescript
-DB_FILE_NAME: z.string().min(1, 'Database file name is required');
-```
+   ```bash
+   pnpm dev
+   ```
 
-### Optional Fields with Defaults
+4. Visit `http://localhost:3000` to access the application
 
-```typescript
-PORT: z.string()
-  .transform((val) => parseInt(val, 10))
-  .pipe(z.number().min(1).max(65535))
-  .default('3000');
-```
+## Multi-User Features
 
-### Transformations
+The application now supports:
 
-```typescript
-PORT: z.string()
-  .transform((val) => parseInt(val, 10)) // Convert string to number
-  .pipe(z.number().min(1).max(65535)); // Validate number range
-```
+- User registration and login
+- User-specific shortlink management
+- Secure password hashing with bcrypt
+- Session-based authentication
+- Data isolation between users
 
-## Error Handling
-
-If any required environment variables are missing or invalid, the application will:
-
-1. Display detailed error messages showing which variables are problematic
-2. Exit with a non-zero code to prevent the application from running with invalid configuration
-
-Example error output:
-
-```
-❌ Invalid environment variables:
-  DB_FILE_NAME: Database file name is required
-  ADMIN_API_KEY: Admin API key is required
-  PORT: Expected number, received string
-```
-
-## Type Safety
-
-The `env` object is fully typed, providing IntelliSense and compile-time checking:
-
-```typescript
-// TypeScript knows the exact types
-env.PORT; // number
-env.DB_FILE_NAME; // string
-env.ADMIN_API_KEY; // string
-```
-
-## Adding New Environment Variables
-
-To add a new environment variable:
-
-1. **Add it to the schema** in `src/config/env.ts`:
-
-```typescript
-const envSchema = z.object({
-  // ... existing fields
-  NEW_VARIABLE: z.string().min(1, 'New variable is required'),
-});
-```
-
-2. **Add it to your `.env` file**:
-
-```env
-NEW_VARIABLE=your-value-here
-```
-
-3. **Use it in your code**:
-
-```typescript
-import { env } from './config/env.js';
-console.log(env.NEW_VARIABLE);
-```
-
-## Best Practices
-
-1. **Always validate environment variables** - Never trust `process.env` directly
-2. **Provide meaningful error messages** - Help developers understand what's wrong
-3. **Use appropriate types** - Transform strings to numbers, booleans, etc. as needed
-4. **Set sensible defaults** - For optional configuration
-5. **Document your variables** - Use comments in your schema and example files
-
-## Security Notes
-
-- Never commit your actual `.env` file to version control
-- Use strong, unique values for sensitive variables like `ADMIN_API_KEY`
-- Consider using a secrets management service for production environments
+Each user can only see and manage their own shortlinks, providing proper data isolation and security.

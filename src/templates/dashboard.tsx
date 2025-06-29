@@ -3,24 +3,31 @@ import { styles } from '@/styles/main.js';
 import Layout from '@/templates/layout.js';
 import { cx } from 'hono/css';
 
-export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl: string }) {
+export default function DashboardPage(props: {
+  shortlinks: Shortlink[];
+  baseUrl: string;
+  user: { username: string; email: string };
+}) {
   return (
     <Layout title="Shortlink Admin Dashboard">
       <div class={styles.container}>
         <div class={styles.header}>
           <h1 class={styles.headerH1}>🔗 Shortlink Admin Dashboard</h1>
-          <p>Manage your shortlinks and create new ones</p>
-          <form method="post" action="/admin/logout" class={styles.formReset}>
-            <button type="submit" class={cx(styles.btn, styles.btnDanger)}>
-              Logout
-            </button>
-          </form>
+          <p>Welcome, {props.user.username}! Manage your shortlinks and create new ones</p>
+          <div class="flex gap-2">
+            <span class="text-sm text-gray-600">Logged in as: {props.user.email}</span>
+            <form method="post" action="/admin/logout" class={styles.formReset}>
+              <button type="submit" class={cx(styles.btn, styles.btnDanger)}>
+                Logout
+              </button>
+            </form>
+          </div>
         </div>
 
         <div class={styles.stats}>
           <div class={styles.statCard}>
             <div class={styles.statNumber}>{props.shortlinks.length}</div>
-            <div class={styles.statLabel}>Total Shortlinks</div>
+            <div class={styles.statLabel}>Your Shortlinks</div>
           </div>
         </div>
 
@@ -62,7 +69,7 @@ export default function DashboardPage(props: { shortlinks: Shortlink[]; baseUrl:
         </div>
 
         <div class={styles.section}>
-          <h2 class={styles.sectionH2}>📋 All Shortlinks</h2>
+          <h2 class={styles.sectionH2}>📋 Your Shortlinks</h2>
           <table class={styles.table}>
             <thead>
               <tr>

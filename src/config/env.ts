@@ -5,7 +5,7 @@ config();
 
 const envSchema = z.object({
   DB_FILE_NAME: z.string().min(1, 'Database file name is required'),
-  ADMIN_API_KEY: z.string().min(1, 'Admin API key is required'),
+  SECRET_KEY: z.string().min(1, 'Secret key is required'),
   PORT: z
     .string()
     .transform((val) => parseInt(val, 10))

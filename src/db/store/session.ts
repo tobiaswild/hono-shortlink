@@ -7,10 +7,10 @@ export default {
     const result = await db.select().from(sessionTable).where(eq(sessionTable.code, code));
     return result[0];
   },
-  async set(code: string, expires: number) {
-    await db.insert(sessionTable).values({ code, expires }).onConflictDoUpdate({
+  async set(code: string, userId: number, expires: number) {
+    await db.insert(sessionTable).values({ code, userId, expires }).onConflictDoUpdate({
       target: sessionTable.code,
-      set: { expires },
+      set: { userId, expires },
     });
   },
   async has(code: string) {
@@ -22,6 +22,10 @@ export default {
   },
   async delete(code: string) {
     const result = await db.delete(sessionTable).where(eq(sessionTable.code, code));
+    return result.rowsAffected > 0;
+  },
+  async deleteByUserId(userId: number) {
+    const result = await db.delete(sessionTable).where(eq(sessionTable.userId, userId));
     return result.rowsAffected > 0;
   },
 };

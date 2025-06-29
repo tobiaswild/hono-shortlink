@@ -1,5 +1,6 @@
 import { env } from '@/config/env.js';
 import sessionStore from '@/db/store/session.js';
+import userStore from '@/db/store/user.js';
 import { wantsHtml } from '@/util/html.js';
 
 import type { Context, Next } from 'hono';
@@ -74,6 +75,29 @@ export const requireAuth = async (c: Context, next: Next) => {
 
     return c.redirect('/admin/login');
   }
+
+  // Get user information
+  const user = await userStore.getById(session.userId);
+  if (!user) {
+    sessionStore.delete(sessionId);
+    deleteCookie(c, env.SESSION_COOKIE);
+
+    if (!wantsHtml(c)) {
+      return c.json(
+        {
+          success: false,
+          code: 401,
+          message: 'User not found',
+        },
+        401
+      );
+    }
+
+    return c.redirect('/admin/login');
+  }
+
+  // Add user to context
+  c.set('user', user);
 
   await next();
 };

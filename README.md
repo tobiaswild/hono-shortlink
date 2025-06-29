@@ -1,27 +1,75 @@
 # hono-shortlink
 
-A simple URL shortener service built with [Hono](https://hono.dev/) and Node.js, using TypeScript and persistent JSON storage.
+A multi-user URL shortener service built with [Hono](https://hono.dev/) and Node.js, using TypeScript and SQLite for persistent storage.
 
 ## Features
 
+- **Multi-user support** with secure authentication
+- User registration and login system
 - Create shortlinks for any URL
 - Redirect shortlinks to their original URLs
-- Persistent storage in `data.json`
+- User-specific shortlink management
+- Persistent storage in SQLite database
+- Secure password hashing with bcrypt
+- Session-based authentication
 - Ready for deployment with GitHub Actions and pm2
 
 ## Setup
 
-```bash
-pnpm install
-```
+1. **Install dependencies:**
 
-## Development
+   ```bash
+   pnpm install
+   ```
 
-```bash
-pnpm run dev
-```
+2. **Set up environment variables:**
+   Create a `.env` file in the root directory:
+
+   ```env
+   DB_FILE_NAME=shortlink.db
+   SECRET_KEY=your-secret-key-here
+   PORT=3000
+   SESSION_COOKIE=session
+   ```
+
+3. **Run database migration:**
+
+   ```bash
+   pnpm migrate
+   ```
+
+   This creates the database schema and a default admin user:
+   - Username: `admin`
+   - Email: `admin@example.com`
+   - Password: `admin123`
+
+4. **Start development server:**
+   ```bash
+   pnpm dev
+   ```
 
 The server will start at [http://localhost:3000](http://localhost:3000)
+
+## Multi-User Features
+
+### User Registration
+
+- Visit `/admin/register` to create a new account
+- Each user gets their own isolated shortlink space
+- Username and email must be unique
+
+### User Login
+
+- Visit `/admin/login` to sign in
+- Secure session-based authentication
+- Users can only see and manage their own shortlinks
+
+### Dashboard
+
+- View all your shortlinks
+- Create new shortlinks with custom codes
+- Delete your shortlinks
+- Copy shortlink URLs
 
 ## Docker Usage
 
@@ -69,21 +117,31 @@ pnpm run build
 
 Redirects to the original URL for the given shortlink code.
 
-### Admin Dashboard
+### Admin Routes
 
-Access the admin dashboard at `/admin` to:
+- **GET /admin/login** - Login page
+- **POST /admin/login** - User authentication
+- **GET /admin/register** - Registration page
+- **POST /admin/register** - User registration
+- **GET /admin/dashboard** - User dashboard (requires auth)
+- **POST /admin/create** - Create new shortlink (requires auth)
+- **POST /admin/delete/:code** - Delete shortlink (requires auth)
+- **POST /admin/logout** - Logout (requires auth)
 
-- View all shortlinks
-- Create new shortlinks (with optional custom codes)
-- Delete shortlinks
-- Copy shortlink URLs
+## Database
 
-Authentication is required using an API key.
+- All data is stored in SQLite database
+- Users, sessions, and shortlinks are properly related
+- Data isolation ensures users can only access their own shortlinks
+- Automatic migration script handles schema updates
 
-## Persistent Storage
+## Security Features
 
-- All shortlinks are stored in `data.json` in the project root.
-- This file is committed to git for transparency.
+- Password hashing with bcrypt (12 rounds)
+- Session-based authentication
+- User data isolation
+- Secure cookie handling
+- Input validation with Zod
 
 ## Deployment
 
