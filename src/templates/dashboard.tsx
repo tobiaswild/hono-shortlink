@@ -108,7 +108,8 @@ export default function DashboardPage(props: {
                     <button
                       type="button"
                       class={cx(styles.btn, styles.deleteBtn)}
-                      onclick={`deleteShortlink('${link.code}')`}
+                      data-code={link.code}
+                      onclick="deleteShortlink(this.dataset.code)"
                     >
                       Delete
                     </button>

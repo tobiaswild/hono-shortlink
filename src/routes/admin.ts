@@ -83,8 +83,14 @@ app.post('/register', async (c) => {
     return c.html(RegisterPage());
   }
 
+  const email = formData.get('email') as string;
+
+  if (!email || !email.includes('@')) {
+    return c.html(RegisterPage());
+  }
+
   const hashedPassword = await hashPassword(password);
-  const result = await userStore.create(username, `${username}@example.com`, hashedPassword);
+  const result = await userStore.create(username, email, hashedPassword);
 
   // Get the created user to get their ID
   const newUser = await userStore.getByUsername(username);
@@ -254,11 +260,10 @@ app.get('/shortlinks', requireAuth, async (c) => {
 
   return c.json({
     success: true,
-    data: shortlinks.map((link: any) => ({
+    data: shortlinks.map((link) => ({
       code: link.code,
       url: link.url,
       shortUrl: `${getBaseUrl(c)}/${link.code}`,
-      createdAt: link.createdAt,
     })),
   });
 });

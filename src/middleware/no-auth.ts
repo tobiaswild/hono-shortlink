@@ -16,7 +16,7 @@ export const requireNoAuth = async (c: Context, next: Next) => {
   if (!hasSession) {
     deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
 
-    next();
+    await next();
 
     return;
   }
@@ -25,7 +25,7 @@ export const requireNoAuth = async (c: Context, next: Next) => {
   if (!session || session.expires < Date.now()) {
     deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
 
-    next();
+    await next();
 
     return;
   }

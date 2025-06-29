@@ -4,7 +4,10 @@ import { and, eq, gte } from 'drizzle-orm';
 
 export default {
   async get(code: string) {
-    const result = await db.select().from(sessionTable).where(eq(sessionTable.code, code));
+    const result = await db
+      .select()
+      .from(sessionTable)
+      .where(and(eq(sessionTable.code, code), gte(sessionTable.expires, Date.now())));
     return result[0];
   },
   async set(code: string, userId: number, expires: number) {

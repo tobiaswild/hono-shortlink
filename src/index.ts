@@ -101,7 +101,7 @@ app.onError((err, c) => {
       {
         success: false,
         code: 500,
-        message: err.message,
+        message: env.NODE_ENV === 'development' ? err.message : 'Internal Server Error',
       },
       500
     );

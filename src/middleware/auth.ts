@@ -41,7 +41,7 @@ export const requireAuth = async (c: Context, next: Next) => {
 
   const session = await sessionStore.get(sessionId);
   if (!session) {
-    sessionStore.delete(sessionId);
+    await sessionStore.delete(sessionId);
     deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
 
     if (!wantsHtml(c)) {
