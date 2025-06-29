@@ -18,24 +18,28 @@ PORT=3000
 SESSION_COOKIE=session
 ```
 
-## Database Migration
+## Database Setup
 
-After setting up your environment variables, run the database migration to set up the multi-user schema:
+After setting up your environment variables, set up the database using Drizzle:
+
+For development (recommended):
 
 ```bash
-pnpm migrate
+pnpm db:push
 ```
 
-This will:
+For production with migrations:
 
-- Create the user table for multi-user support
-- Update the session and shortlink tables to include user relationships
-- Create a default admin user with credentials:
-  - Username: `admin`
-  - Email: `admin@example.com`
-  - Password: `admin123`
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
 
-**Important**: Change the default admin credentials after first login for security.
+Optional: View database in Drizzle Studio:
+
+```bash
+pnpm db:studio
+```
 
 ## Running the Application
 
@@ -45,10 +49,10 @@ This will:
    pnpm install
    ```
 
-2. Run the migration:
+2. Set up the database:
 
    ```bash
-   pnpm migrate
+   pnpm db:push
    ```
 
 3. Start the development server:
@@ -70,3 +74,10 @@ The application now supports:
 - Data isolation between users
 
 Each user can only see and manage their own shortlinks, providing proper data isolation and security.
+
+## Database Management
+
+- **Push schema (dev)**: `pnpm db:push` - Pushes schema changes directly to database (development)
+- **Generate migrations**: `pnpm db:generate` - Creates migration files based on schema changes
+- **Run migrations**: `pnpm db:migrate` - Applies pending migrations to the database (production)
+- **View database**: `pnpm db:studio` - Opens Drizzle Studio to view and edit data

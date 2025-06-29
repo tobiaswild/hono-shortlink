@@ -32,16 +32,11 @@ A multi-user URL shortener service built with [Hono](https://hono.dev/) and Node
    SESSION_COOKIE=session
    ```
 
-3. **Run database migration:**
+3. **Set up the database:**
 
    ```bash
-   pnpm migrate
+   pnpm db:push
    ```
-
-   This creates the database schema and a default admin user:
-   - Username: `admin`
-   - Email: `admin@example.com`
-   - Password: `admin123`
 
 4. **Start development server:**
    ```bash
@@ -133,7 +128,14 @@ Redirects to the original URL for the given shortlink code.
 - All data is stored in SQLite database
 - Users, sessions, and shortlinks are properly related
 - Data isolation ensures users can only access their own shortlinks
-- Automatic migration script handles schema updates
+- Uses Drizzle ORM for type-safe database operations
+
+## Database Management
+
+- **Push schema (dev)**: `pnpm db:push` - Pushes schema changes directly to database (development)
+- **Generate migrations**: `pnpm db:generate` - Creates migration files based on schema changes
+- **Run migrations**: `pnpm db:migrate` - Applies pending migrations to the database (production)
+- **View database**: `pnpm db:studio` - Opens Drizzle Studio to view and edit data
 
 ## Security Features
 
