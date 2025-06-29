@@ -1,8 +1,8 @@
+import type { Context, Next } from 'hono';
+import { deleteCookie, getCookie } from 'hono/cookie';
 import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
 import { wantsHtml } from '@/util/html.js';
-import type { Context, Next } from 'hono';
-import { deleteCookie, getCookie } from 'hono/cookie';
 
 export const requireNoAuth = async (c: Context, next: Next) => {
   const sessionId = getCookie(c, APP_CONFIG.SESSION_COOKIE);
@@ -37,7 +37,7 @@ export const requireNoAuth = async (c: Context, next: Next) => {
         code: 400,
         message: 'Already authenticated',
       },
-      400
+      400,
     );
   }
 

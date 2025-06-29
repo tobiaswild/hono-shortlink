@@ -1,7 +1,7 @@
+import { cx } from 'hono/css';
 import type { Shortlink } from '@/db/types/shortlink.js';
 import { styles } from '@/styles/main.js';
 import Layout from '@/templates/layout.js';
-import { cx } from 'hono/css';
 
 export default function DashboardPage(props: {
   shortlinks: Shortlink[];
@@ -13,9 +13,14 @@ export default function DashboardPage(props: {
       <div class={styles.container}>
         <div class={styles.header}>
           <h1 class={styles.headerH1}>🔗 Admin Dashboard</h1>
-          <p>Welcome, {props.user.username}! Manage your shortlinks and create new ones</p>
+          <p>
+            Welcome, {props.user.username}! Manage your shortlinks and create
+            new ones
+          </p>
           <div class="flex gap-2">
-            <span class="text-sm text-gray-600">Logged in as: {props.user.email}</span>
+            <span class="text-sm text-gray-600">
+              Logged in as: {props.user.email}
+            </span>
             <form method="post" action="/admin/logout" class={styles.formReset}>
               <button type="submit" class={cx(styles.btn, styles.btnDanger)}>
                 Logout
@@ -87,7 +92,10 @@ export default function DashboardPage(props: {
                   <td class={styles.tableTd}>
                     <span class={styles.shortlinkCode}>{link.code}</span>
                   </td>
-                  <td class={cx(styles.tableTd, styles.shortlinkUrl)} title={link.url}>
+                  <td
+                    class={cx(styles.tableTd, styles.shortlinkUrl)}
+                    title={link.url}
+                  >
                     {link.url}
                   </td>
                   <td

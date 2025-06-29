@@ -1,5 +1,5 @@
-import { styles } from '@/styles/main.js';
 import { cx } from 'hono/css';
+import { styles } from '@/styles/main.js';
 import Layout from './layout.js';
 
 export default function RegisterPage() {
@@ -61,13 +61,19 @@ export default function RegisterPage() {
                 placeholder="Confirm Password"
               />
             </div>
-            <button type="submit" class={cx(styles.btn, styles.btnPrimary, styles.btnFull)}>
+            <button
+              type="submit"
+              class={cx(styles.btn, styles.btnPrimary, styles.btnFull)}
+            >
               Create account
             </button>
           </form>
           <p class="mt-4 text-center text-sm text-gray-600">
             Already have an account?{' '}
-            <a href="/admin/login" class="font-medium text-indigo-600 hover:text-indigo-500">
+            <a
+              href="/admin/login"
+              class="font-medium text-indigo-600 hover:text-indigo-500"
+            >
               Sign in here
             </a>
           </p>

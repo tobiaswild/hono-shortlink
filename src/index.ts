@@ -4,7 +4,6 @@ import admin from '@/routes/admin.js';
 import ErrorPage from '@/templates/error.js';
 import NotFoundPage from '@/templates/not-found.js';
 import '@/types/context.js';
-import { wantsHtml } from '@/util/html.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
@@ -15,6 +14,7 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
+import { wantsHtml } from '@/util/html.js';
 
 const app = new Hono();
 
@@ -40,7 +40,7 @@ app.get('/', (c) => {
         code: 200,
         url: url,
       },
-      200
+      200,
     );
   }
 
@@ -60,7 +60,7 @@ app.get('/:code', async (c) => {
           code: 404,
           message: 'Shortlink not found',
         },
-        404
+        404,
       );
     }
 
@@ -86,7 +86,7 @@ app.notFound((c) => {
         code: 404,
         message: '404 Not Found',
       },
-      404
+      404,
     );
   }
 
@@ -101,9 +101,12 @@ app.onError((err, c) => {
       {
         success: false,
         code: 500,
-        message: env.NODE_ENV === 'development' ? err.message : 'Internal Server Error',
+        message:
+          env.NODE_ENV === 'development'
+            ? err.message
+            : 'Internal Server Error',
       },
-      500
+      500,
     );
   }
 
@@ -119,7 +122,7 @@ const server = serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-  }
+  },
 );
 
 process.on('SIGINT', () => {

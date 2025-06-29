@@ -1,3 +1,5 @@
+import { Hono } from 'hono';
+import { getCookie, setCookie } from 'hono/cookie';
 import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
 import shortlinkStore from '@/db/store/shortlink.js';
@@ -10,8 +12,6 @@ import { getCode } from '@/util/code.js';
 import { wantsHtml } from '@/util/html.js';
 import { hashPassword, verifyPassword } from '@/util/password.js';
 import { getBaseUrl } from '@/util/url.js';
-import { Hono } from 'hono';
-import { getCookie, setCookie } from 'hono/cookie';
 
 const app = new Hono();
 
@@ -139,7 +139,7 @@ app.get('/', requireAuth, async (c) => {
       shortlinks,
       baseUrl: getBaseUrl(c),
       user,
-    })
+    }),
   );
 });
 
@@ -157,7 +157,7 @@ app.post('/shortlinks', requireAuth, async (c) => {
           code: 400,
           message: 'URL is required',
         },
-        400
+        400,
       );
     }
 
@@ -166,7 +166,7 @@ app.post('/shortlinks', requireAuth, async (c) => {
         shortlinks: await shortlinkStore.getAllByUserId(user.id),
         baseUrl: getBaseUrl(c),
         user,
-      })
+      }),
     );
   }
 
@@ -187,7 +187,7 @@ app.post('/shortlinks', requireAuth, async (c) => {
           code: 500,
           message: 'Failed to generate unique code',
         },
-        500
+        500,
       );
     }
 
@@ -196,7 +196,7 @@ app.post('/shortlinks', requireAuth, async (c) => {
         shortlinks: await shortlinkStore.getAllByUserId(user.id),
         baseUrl: getBaseUrl(c),
         user,
-      })
+      }),
     );
   }
 
@@ -229,7 +229,7 @@ app.delete('/shortlinks/:code', requireAuth, async (c) => {
         code: 404,
         message: 'Shortlink not found',
       },
-      404
+      404,
     );
   }
 
@@ -243,7 +243,7 @@ app.delete('/shortlinks/:code', requireAuth, async (c) => {
         code: 403,
         message: 'Forbidden',
       },
-      403
+      403,
     );
   }
 

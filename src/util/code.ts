@@ -11,7 +11,8 @@ export async function getCode() {
 }
 
 function generateCode() {
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const chars =
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
   for (let i = 0; i < APP_CONFIG.SHORTLINK_CODE_LENGTH; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));

@@ -1,10 +1,9 @@
+import type { Context, Next } from 'hono';
+import { deleteCookie, getCookie } from 'hono/cookie';
 import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
 import userStore from '@/db/store/user.js';
 import { wantsHtml } from '@/util/html.js';
-
-import type { Context, Next } from 'hono';
-import { deleteCookie, getCookie } from 'hono/cookie';
 
 export const requireAuth = async (c: Context, next: Next) => {
   const sessionId = getCookie(c, APP_CONFIG.SESSION_COOKIE);
@@ -16,7 +15,7 @@ export const requireAuth = async (c: Context, next: Next) => {
           code: 401,
           message: 'Unauthorized',
         },
-        401
+        401,
       );
     }
 
@@ -32,7 +31,7 @@ export const requireAuth = async (c: Context, next: Next) => {
           code: 401,
           message: 'Session invalid',
         },
-        401
+        401,
       );
     }
 
@@ -51,7 +50,7 @@ export const requireAuth = async (c: Context, next: Next) => {
           code: 401,
           message: 'Session invalid',
         },
-        401
+        401,
       );
     }
 
@@ -69,7 +68,7 @@ export const requireAuth = async (c: Context, next: Next) => {
           code: 401,
           message: 'Session expired',
         },
-        401
+        401,
       );
     }
 
@@ -89,7 +88,7 @@ export const requireAuth = async (c: Context, next: Next) => {
           code: 401,
           message: 'User not found',
         },
-        401
+        401,
       );
     }
 
