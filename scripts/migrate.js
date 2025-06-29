@@ -49,7 +49,7 @@ async function migrate() {
     const oldSessionExists = await db.execute(`
       SELECT name FROM sqlite_master WHERE type='table' AND name='session'
     `);
-    
+
     const oldShortlinkExists = await db.execute(`
       SELECT name FROM sqlite_master WHERE type='table' AND name='shortlink'
     `);
@@ -63,14 +63,17 @@ async function migrate() {
     // Always create default admin user
     console.log('Creating default admin user...');
     const passwordHash = await bcrypt.hash('admin123', 12);
-    
+
     // Check if admin user already exists
     const existingAdmin = await db.execute('SELECT id FROM user WHERE username = ?', ['admin']);
     if (existingAdmin.rows.length === 0) {
-      await db.execute(`
+      await db.execute(
+        `
         INSERT INTO user (username, email, passwordHash) 
         VALUES (?, ?, ?)
-      `, ['admin', 'admin@example.com', passwordHash]);
+      `,
+        ['admin', 'admin@example.com', passwordHash]
+      );
       console.log('Default admin user created.');
     } else {
       console.log('Admin user already exists.');
@@ -78,17 +81,20 @@ async function migrate() {
 
     if (oldShortlinkExists.rows.length > 0) {
       console.log('Migrating shortlink data...');
-      
+
       // Get admin user ID
       const adminUser = await db.execute('SELECT id FROM user WHERE username = ?', ['admin']);
       const userId = adminUser.rows[0].id;
-      
+
       // Migrate existing shortlinks to the default user
-      await db.execute(`
+      await db.execute(
+        `
         INSERT INTO shortlink_new (userId, code, url)
         SELECT ?, code, url FROM shortlink
-      `, [userId]);
-      
+      `,
+        [userId]
+      );
+
       // Drop old table
       await db.execute('DROP TABLE shortlink');
     }
@@ -104,11 +110,10 @@ async function migrate() {
     console.log('Email: admin@example.com');
     console.log('Password: admin123');
     console.log('Please change these credentials after first login.');
-    
   } catch (error) {
     console.error('Migration failed:', error);
     process.exit(1);
   }
 }
 
-migrate(); 
+migrate();
