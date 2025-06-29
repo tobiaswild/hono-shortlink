@@ -1,7 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "hono/jsx/jsx-runtime";
-import { styles } from '@/styles/main.js';
-import { cx } from 'hono/css';
-import Layout from './layout.js';
-export default function LoginPage() {
-    return (_jsx(Layout, { title: "Shortlink Admin Login", children: _jsx("div", { class: styles.loginContainer, children: _jsxs("div", { class: styles.loginForm, children: [_jsx("h2", { class: styles.loginFormH2, children: "\uD83D\uDD10 Admin Login" }), _jsxs("form", { id: "loginForm", method: "post", action: "/admin/login", children: [_jsxs("div", { class: styles.formGroup, children: [_jsx("label", { for: "username", class: styles.formGroupLabel, children: "Username:" }), _jsx("input", { type: "text", id: "username", name: "username", placeholder: "Enter your username", required: true, class: styles.formGroupInput })] }), _jsxs("div", { class: styles.formGroup, children: [_jsx("label", { for: "password", class: styles.formGroupLabel, children: "Password:" }), _jsx("input", { type: "password", id: "password", name: "password", placeholder: "Enter your password", required: true, class: styles.formGroupInput })] }), _jsx("button", { type: "submit", class: cx(styles.btn, styles.btnPrimary, styles.btnFull), children: "Login" })] }), _jsxs("p", { class: "mt-4 text-center text-sm text-gray-600", children: ["Don't have an account?", ' ', _jsx("a", { href: "/admin/register", class: "font-medium text-indigo-600 hover:text-indigo-500", children: "Create one here" })] })] }) }) }));
-}
