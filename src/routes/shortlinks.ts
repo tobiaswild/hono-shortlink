@@ -13,7 +13,7 @@ app.post('/', requireAuth, async (c) => {
   }
   const formData = await c.req.formData();
   const url = formData.get('url') as string;
-  const code = formData.get('customCode') as string;
+  const customCode = formData.get('customCode') as string;
 
   if (!url) {
     setFlash(c, 'URL is required');
@@ -21,17 +21,14 @@ app.post('/', requireAuth, async (c) => {
     return c.redirect('/dashboard');
   }
 
-  if (!code) {
-    let code: string;
-    let attempts = 0;
-    const maxAttempts = 10;
+  let code = customCode;
 
-    do {
-      code = await getCode();
-      attempts++;
-    } while ((await shortlinkStore.has(code)) && attempts < maxAttempts);
+  if (!customCode) {
+    try {
+       code = await getCode();
+    } catch (err) {
+      console.error(err);
 
-    if (attempts >= maxAttempts) {
       setFlash(c, 'Failed to create shortlink');
 
       return c.redirect('/dashboard');

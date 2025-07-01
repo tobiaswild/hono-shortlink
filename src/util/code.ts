@@ -1,11 +1,19 @@
 import { APP_CONFIG } from '@/config/app.js';
-import urlStore from '@/db/store/shortlink.js';
+import shortlinkStore from '@/db/store/shortlink.js';
 
 export async function getCode() {
   let code: string;
+  let attempts = 0;
+  const maxAttempts = 10;
+
   do {
-    code = generateCode();
-  } while (await urlStore.has(code));
+    code = await generateCode();
+    attempts++;
+  } while ((await shortlinkStore.has(code)) && attempts < maxAttempts);
+
+  if (attempts >= maxAttempts) {
+    throw new Error('max attempts reached');
+  }
 
   return code;
 }
