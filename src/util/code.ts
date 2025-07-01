@@ -7,7 +7,7 @@ export async function getCode() {
   const maxAttempts = 10;
 
   do {
-    code = await generateCode();
+    code = generateCode();
     attempts++;
   } while ((await shortlinkStore.has(code)) && attempts < maxAttempts);
 

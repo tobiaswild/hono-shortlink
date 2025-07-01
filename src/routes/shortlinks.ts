@@ -25,7 +25,7 @@ app.post('/', requireAuth, async (c) => {
 
   if (!customCode) {
     try {
-       code = await getCode();
+      code = await getCode();
     } catch (err) {
       console.error(err);
 
