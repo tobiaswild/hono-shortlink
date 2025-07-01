@@ -9,7 +9,6 @@ import DashboardPage from '@/templates/dashboard.js';
 import LoginPage from '@/templates/login.js';
 import RegisterPage from '@/templates/register.js';
 import { getCode } from '@/util/code.js';
-import { wantsHtml } from '@/util/html.js';
 import { hashPassword, verifyPassword } from '@/util/password.js';
 import { getBaseUrl } from '@/util/url.js';
 
@@ -133,16 +132,6 @@ app.post('/logout', requireAuth, async (c) => {
 app.get('/', requireAuth, async (c) => {
   const user = c.get('user');
   if (!user) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'Unauthorized: user not found in context',
-        },
-        401,
-      );
-    }
     return c.redirect('/admin/login');
   }
   const shortlinks = await shortlinkStore.getAllByUserId(user.id);
@@ -160,40 +149,13 @@ app.get('/', requireAuth, async (c) => {
 app.post('/shortlinks', requireAuth, async (c) => {
   const user = c.get('user');
   if (!user) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'Unauthorized: user not found in context',
-        },
-        401,
-      );
-    }
     return c.redirect('/admin/login');
   }
   const formData = await c.req.formData();
   const url = formData.get('url') as string;
 
   if (!url) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 400,
-          message: 'URL is required',
-        },
-        400,
-      );
-    }
-
-    return c.html(
-      DashboardPage({
-        shortlinks: await shortlinkStore.getAllByUserId(user.id),
-        baseUrl: getBaseUrl(c),
-        user,
-      }),
-    );
+    return c.redirect('/admin');
   }
 
   let code: string;
@@ -206,38 +168,10 @@ app.post('/shortlinks', requireAuth, async (c) => {
   } while ((await shortlinkStore.has(code)) && attempts < maxAttempts);
 
   if (attempts >= maxAttempts) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 500,
-          message: 'Failed to generate unique code',
-        },
-        500,
-      );
-    }
-
-    return c.html(
-      DashboardPage({
-        shortlinks: await shortlinkStore.getAllByUserId(user.id),
-        baseUrl: getBaseUrl(c),
-        user,
-      }),
-    );
+    return c.redirect('/admin');
   }
 
   await shortlinkStore.set(code, url, user.id);
-
-  if (!wantsHtml(c)) {
-    return c.json({
-      success: true,
-      data: {
-        code,
-        url,
-        shortUrl: `${getBaseUrl(c)}/${code}`,
-      },
-    });
-  }
 
   return c.redirect('/admin');
 });
@@ -246,66 +180,29 @@ app.post('/shortlinks', requireAuth, async (c) => {
 app.delete('/shortlinks/:code', requireAuth, async (c) => {
   const user = c.get('user');
   if (!user) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'Unauthorized: user not found in context',
-        },
-        401,
-      );
-    }
     return c.redirect('/admin/login');
   }
   const code = c.req.param('code');
 
   const shortlinkUrl = await shortlinkStore.get(code);
   if (!shortlinkUrl) {
-    return c.json(
-      {
-        success: false,
-        code: 404,
-        message: 'Shortlink not found',
-      },
-      404,
-    );
+    return c.redirect('/admin');
   }
 
   // For now, we'll delete without checking ownership since the store doesn't return userId
   // In a real app, you'd want to modify the store to return full shortlink objects
   const deleted = await shortlinkStore.deleteByUserId(code, user.id);
   if (!deleted) {
-    return c.json(
-      {
-        success: false,
-        code: 403,
-        message: 'Forbidden',
-      },
-      403,
-    );
+    return c.redirect('/admin');
   }
 
-  return c.json({
-    success: true,
-    message: 'Shortlink deleted',
-  });
+  return c.redirect('/admin');
 });
 
 // API endpoint to get user's shortlinks
 app.get('/shortlinks', requireAuth, async (c) => {
   const user = c.get('user');
   if (!user) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'Unauthorized: user not found in context',
-        },
-        401,
-      );
-    }
     return c.redirect('/admin/login');
   }
   const shortlinks = await shortlinkStore.getAllByUserId(user.id);

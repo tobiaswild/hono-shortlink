@@ -14,7 +14,6 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
-import { wantsHtml } from '@/util/html.js';
 
 const app = new Hono();
 
@@ -30,85 +29,24 @@ app.use('/favicon.ico', serveStatic({ path: './static/favicon.svg' }));
 
 app.route('/admin', admin);
 
-app.get('/', (c) => {
-  const url = 'https://github.com/tobiaswild/hono-shortlink';
-
-  if (!wantsHtml(c)) {
-    return c.json(
-      {
-        success: true,
-        code: 200,
-        url: url,
-      },
-      200,
-    );
-  }
-
-  return c.redirect(url);
-});
-
 app.get('/:code', async (c) => {
   const code = c.req.param('code');
 
   const url = await urlStore.get(code);
 
   if (!url) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 404,
-          message: 'Shortlink not found',
-        },
-        404,
-      );
-    }
-
     return c.html(NotFoundPage());
-  }
-
-  if (!wantsHtml(c)) {
-    return c.json({
-      success: true,
-      code: 200,
-      url: url,
-    });
   }
 
   return c.redirect(url);
 });
 
 app.notFound((c) => {
-  if (!wantsHtml(c)) {
-    return c.json(
-      {
-        success: false,
-        code: 404,
-        message: '404 Not Found',
-      },
-      404,
-    );
-  }
-
   return c.html(NotFoundPage());
 });
 
 app.onError((err, c) => {
   console.error(`${err}`);
-
-  if (!wantsHtml(c)) {
-    return c.json(
-      {
-        success: false,
-        code: 500,
-        message:
-          env.NODE_ENV === 'development'
-            ? err.message
-            : 'Internal Server Error',
-      },
-      500,
-    );
-  }
 
   return c.html(ErrorPage());
 });

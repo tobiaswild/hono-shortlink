@@ -3,38 +3,15 @@ import { deleteCookie, getCookie } from 'hono/cookie';
 import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
 import userStore from '@/db/store/user.js';
-import { wantsHtml } from '@/util/html.js';
 
 export const requireAuth = async (c: Context, next: Next) => {
   const sessionId = getCookie(c, APP_CONFIG.SESSION_COOKIE);
   if (!sessionId) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'Unauthorized',
-        },
-        401,
-      );
-    }
-
     return c.redirect('/admin/login');
   }
 
   const hasSession = await sessionStore.has(sessionId);
   if (!hasSession) {
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'Session invalid',
-        },
-        401,
-      );
-    }
-
     return c.redirect('/admin/login');
   }
 
@@ -42,36 +19,12 @@ export const requireAuth = async (c: Context, next: Next) => {
   if (!session) {
     await sessionStore.delete(sessionId);
     deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
-
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'Session invalid',
-        },
-        401,
-      );
-    }
-
     return c.redirect('/admin/login');
   }
 
   if (session.expires < Date.now()) {
     sessionStore.delete(sessionId);
     deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
-
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'Session expired',
-        },
-        401,
-      );
-    }
-
     return c.redirect('/admin/login');
   }
 
@@ -80,18 +33,6 @@ export const requireAuth = async (c: Context, next: Next) => {
   if (!user) {
     sessionStore.delete(sessionId);
     deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
-
-    if (!wantsHtml(c)) {
-      return c.json(
-        {
-          success: false,
-          code: 401,
-          message: 'User not found',
-        },
-        401,
-      );
-    }
-
     return c.redirect('/admin/login');
   }
 
