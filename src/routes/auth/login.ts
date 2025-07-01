@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { setCookie } from 'hono/cookie';
 import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
-import userStore from '@/db/store/user.js'; 
+import userStore from '@/db/store/user.js';
 import LoginPage from '@/templates/login.js';
 import { verifyPassword } from '@/util/password.js';
 

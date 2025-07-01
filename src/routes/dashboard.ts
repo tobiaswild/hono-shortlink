@@ -23,7 +23,6 @@ app.get('/', requireAuth, async (c) => {
   );
 });
 
-
 app.post('/shortlinks', requireAuth, async (c) => {
   const user = c.get('user');
   if (!user) {
@@ -54,7 +53,6 @@ app.post('/shortlinks', requireAuth, async (c) => {
   return c.redirect('/dashboard');
 });
 
-
 app.delete('/shortlinks/:code', requireAuth, async (c) => {
   const user = c.get('user');
   if (!user) {
@@ -66,7 +64,6 @@ app.delete('/shortlinks/:code', requireAuth, async (c) => {
   if (!shortlinkUrl) {
     return c.redirect('/dashboard');
   }
-
 
   const deleted = await shortlinkStore.deleteByUserId(code, user.id);
   if (!deleted) {

@@ -27,7 +27,7 @@ export const requireNoAuth = async (c: Context, next: Next) => {
     await next();
 
     return;
-    }
+  }
 
   return c.redirect('/dashboard');
 };
