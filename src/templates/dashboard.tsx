@@ -21,7 +21,7 @@ export default function DashboardPage(props: {
             <span class="text-sm text-gray-600">
               Logged in as: {props.user.email}
             </span>
-            <form method="post" action="/admin/logout" class={styles.formReset}>
+            <form method="post" action="/auth/logout" class={styles.formReset}>
               <button type="submit" class={cx(styles.btn, styles.btnDanger)}>
                 Logout
               </button>
@@ -38,7 +38,7 @@ export default function DashboardPage(props: {
 
         <div class={styles.section}>
           <h2 class={styles.sectionH2}>➕ Create New Shortlink</h2>
-          <form id="createForm" method="post" action="/admin/shortlinks">
+          <form id="createForm" method="post" action="/shortlinks">
             <div class={styles.formGroup}>
               <label for="url" class={styles.formGroupLabel}>
                 Target URL:
@@ -128,27 +128,6 @@ export default function DashboardPage(props: {
           </table>
         </div>
       </div>
-
-      <script>
-        {`
-          async function deleteShortlink(code) {
-            if (confirm('Are you sure you want to delete this shortlink?')) {
-              try {
-                const response = await fetch(\`/admin/shortlinks/\${code}\`, {
-                  method: 'DELETE',
-                });
-                if (response.ok) {
-                  window.location.reload();
-                } else {
-                  alert('Failed to delete shortlink');
-                }
-              } catch (error) {
-                alert('Error deleting shortlink');
-              }
-            }
-          }
-        `}
-      </script>
     </Layout>
   );
 }

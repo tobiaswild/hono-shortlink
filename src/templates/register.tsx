@@ -8,7 +8,7 @@ export default function RegisterPage() {
       <div class={styles.loginContainer}>
         <div class={styles.loginForm}>
           <h2 class={styles.loginFormH2}>📝 Register</h2>
-          <form class="mt-8 space-y-6" action="/admin/register" method="post">
+          <form class="mt-8 space-y-6" action="/auth/register" method="post">
             <div class={styles.formGroup}>
               <label for="username" class={styles.formGroupLabel}>
                 Username:
@@ -71,7 +71,7 @@ export default function RegisterPage() {
           <p class="mt-4 text-center text-sm text-gray-600">
             Already have an account?{' '}
             <a
-              href="/admin/login"
+              href="/auth/login"
               class="font-medium text-indigo-600 hover:text-indigo-500"
             >
               Sign in here

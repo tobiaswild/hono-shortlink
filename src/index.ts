@@ -1,6 +1,8 @@
 import { env } from '@/config/env.js';
 import urlStore from '@/db/store/shortlink.js';
-import admin from '@/routes/admin.js';
+import authRoutes from '@/routes/auth/index.js';
+import dashboardRoutes from '@/routes/dashboard.js';
+import shortlinksRoutes from '@/routes/shortlinks.js';
 import ErrorPage from '@/templates/error.js';
 import NotFoundPage from '@/templates/not-found.js';
 import '@/types/context.js';
@@ -27,16 +29,14 @@ app.use(compress());
 app.use('/static/*', serveStatic({ root: './' }));
 app.use('/favicon.ico', serveStatic({ path: './static/favicon.svg' }));
 
-app.route('/admin', admin);
+app.route('/auth', authRoutes);
+app.route('/dashboard', dashboardRoutes);
+app.route('/shortlinks', shortlinksRoutes);
 
 app.get('/:code', async (c) => {
   const code = c.req.param('code');
 
   const url = await urlStore.get(code);
-
-  if (!url) {
-    return c.html(NotFoundPage());
-  }
 
   return c.redirect(url);
 });
