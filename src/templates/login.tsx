@@ -2,12 +2,13 @@ import { cx } from 'hono/css';
 import { styles } from '@/styles/main.js';
 import Layout from './layout.js';
 
-export default function LoginPage() {
+export default function LoginPage({ flash }: { flash?: string }) {
   return (
     <Layout title="Admin Login">
       <div class={styles.loginContainer}>
         <div class={styles.loginForm}>
           <h2 class={styles.loginFormH2}>🔐 Admin Login</h2>
+          {flash && <p class="text-red-500">{flash}</p>}
           <form id="loginForm" method="post" action="/auth/login">
             <div class={styles.formGroup}>
               <label for="username" class={styles.formGroupLabel}>

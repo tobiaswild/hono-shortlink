@@ -26,21 +26,12 @@ export default {
       .where(eq(shortlinkTable.code, code));
     return result.length > 0;
   },
-  async getAll() {
-    return await db.select().from(shortlinkTable).orderBy(shortlinkTable.id);
-  },
   async getAllByUserId(userId: number) {
     return await db
       .select()
       .from(shortlinkTable)
       .where(eq(shortlinkTable.userId, userId))
       .orderBy(shortlinkTable.id);
-  },
-  async delete(code: string) {
-    const result = await db
-      .delete(shortlinkTable)
-      .where(eq(shortlinkTable.code, code));
-    return result.rowsAffected > 0;
   },
   async deleteByUserId(code: string, userId: number) {
     const result = await db

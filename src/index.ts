@@ -3,8 +3,6 @@ import urlStore from '@/db/store/shortlink.js';
 import authRoutes from '@/routes/auth/index.js';
 import dashboardRoutes from '@/routes/dashboard.js';
 import shortlinksRoutes from '@/routes/shortlinks.js';
-import ErrorPage from '@/templates/error.js';
-import NotFoundPage from '@/templates/not-found.js';
 import '@/types/context.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
@@ -39,16 +37,6 @@ app.get('/:code', async (c) => {
   const url = await urlStore.get(code);
 
   return c.redirect(url);
-});
-
-app.notFound((c) => {
-  return c.html(NotFoundPage());
-});
-
-app.onError((err, c) => {
-  console.error(`${err}`);
-
-  return c.html(ErrorPage());
 });
 
 showRoutes(app);

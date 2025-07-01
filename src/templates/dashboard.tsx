@@ -7,6 +7,7 @@ export default function DashboardPage(props: {
   shortlinks: Shortlink[];
   baseUrl: string;
   user: { username: string; email: string };
+  flash?: string;
 }) {
   return (
     <Layout title="Admin Dashboard">
@@ -28,6 +29,8 @@ export default function DashboardPage(props: {
             </form>
           </div>
         </div>
+
+        {props.flash && <p class="text-red-500">{props.flash}</p>}
 
         <div class={styles.stats}>
           <div class={styles.statCard}>
@@ -113,14 +116,19 @@ export default function DashboardPage(props: {
                       Open
                     </a>
 
-                    <button
-                      type="button"
-                      class={cx(styles.btn, styles.deleteBtn)}
-                      data-code={link.code}
-                      onclick="deleteShortlink(this.dataset.code)"
+                    <form
+                      method="post"
+                      action={`/shortlinks/${link.code}/delete`}
                     >
-                      Delete
-                    </button>
+                      <button
+                        type="submit"
+                        class={cx(styles.btn, styles.deleteBtn)}
+                        data-code={link.code}
+                        onclick="deleteShortlink(this.dataset.code)"
+                      >
+                        Delete
+                      </button>
+                    </form>
                   </td>
                 </tr>
               ))}

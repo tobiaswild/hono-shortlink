@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import shortlinkStore from '@/db/store/shortlink.js';
 import { requireAuth } from '@/middleware/auth.js';
 import { getCode } from '@/util/code.js';
+import { setFlash } from '@/util/flash.js';
 
 const app = new Hono();
 
@@ -12,30 +13,49 @@ app.post('/', requireAuth, async (c) => {
   }
   const formData = await c.req.formData();
   const url = formData.get('url') as string;
+  const code = formData.get('customCode') as string;
 
   if (!url) {
+    setFlash(c, 'URL is required');
+
     return c.redirect('/dashboard');
   }
 
-  let code: string;
-  let attempts = 0;
-  const maxAttempts = 10;
+  if (!code) {
+    let code: string;
+    let attempts = 0;
+    const maxAttempts = 10;
 
-  do {
-    code = await getCode();
-    attempts++;
-  } while ((await shortlinkStore.has(code)) && attempts < maxAttempts);
+    do {
+      code = await getCode();
+      attempts++;
+    } while ((await shortlinkStore.has(code)) && attempts < maxAttempts);
 
-  if (attempts >= maxAttempts) {
+    if (attempts >= maxAttempts) {
+      setFlash(c, 'Failed to create shortlink');
+
+      return c.redirect('/dashboard');
+    }
+  }
+
+  try {
+    await shortlinkStore.set(code, url, user.id);
+  } catch (err) {
+    if (err instanceof Error) {
+      setFlash(c, err.message);
+    } else {
+      setFlash(c, 'an error occured');
+    }
+
     return c.redirect('/dashboard');
   }
 
-  await shortlinkStore.set(code, url, user.id);
+  setFlash(c, 'Shortlink created');
 
   return c.redirect('/dashboard');
 });
 
-app.delete('/:code', requireAuth, async (c) => {
+app.post('/:code/delete', requireAuth, async (c) => {
   const user = c.get('user');
   if (!user) {
     return c.redirect('/auth/login');
@@ -44,13 +64,19 @@ app.delete('/:code', requireAuth, async (c) => {
 
   const shortlinkUrl = await shortlinkStore.get(code);
   if (!shortlinkUrl) {
+    setFlash(c, 'Shortlink not found');
+
     return c.redirect('/dashboard');
   }
 
   const deleted = await shortlinkStore.deleteByUserId(code, user.id);
   if (!deleted) {
+    setFlash(c, 'Failed to delete shortlink');
+
     return c.redirect('/dashboard');
   }
+
+  setFlash(c, 'Shortlink deleted');
 
   return c.redirect('/dashboard');
 });

@@ -2,12 +2,13 @@ import { cx } from 'hono/css';
 import { styles } from '@/styles/main.js';
 import Layout from './layout.js';
 
-export default function RegisterPage() {
+export default function RegisterPage({ flash }: { flash?: string }) {
   return (
     <Layout title="Register">
       <div class={styles.loginContainer}>
         <div class={styles.loginForm}>
           <h2 class={styles.loginFormH2}>📝 Register</h2>
+          {flash && <p class="text-red-500">{flash}</p>}
           <form class="mt-8 space-y-6" action="/auth/register" method="post">
             <div class={styles.formGroup}>
               <label for="username" class={styles.formGroupLabel}>

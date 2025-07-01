@@ -1,11 +1,10 @@
 import type { Context, Next } from 'hono';
-import { deleteCookie, getCookie } from 'hono/cookie';
-import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
 import userStore from '@/db/store/user.js';
+import { deleteSession, getSession } from '@/util/session.js';
 
 export const requireAuth = async (c: Context, next: Next) => {
-  const sessionId = getCookie(c, APP_CONFIG.SESSION_COOKIE);
+  const sessionId = getSession(c);
   if (!sessionId) {
     return c.redirect('/auth/login');
   }
@@ -18,20 +17,26 @@ export const requireAuth = async (c: Context, next: Next) => {
   const session = await sessionStore.get(sessionId);
   if (!session) {
     await sessionStore.delete(sessionId);
-    deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
+
+    deleteSession(c);
+
     return c.redirect('/auth/login');
   }
 
   if (session.expires < Date.now()) {
     sessionStore.delete(sessionId);
-    deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
+
+    deleteSession(c);
+
     return c.redirect('/auth/login');
   }
 
   const user = await userStore.getById(session.userId);
   if (!user) {
     sessionStore.delete(sessionId);
-    deleteCookie(c, APP_CONFIG.SESSION_COOKIE);
+
+    deleteSession(c);
+
     return c.redirect('/auth/login');
   }
 
