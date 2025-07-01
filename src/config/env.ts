@@ -11,6 +11,9 @@ const envSchema = z.object({
     .default('3000')
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().min(1).max(65535)),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
 });
 
 const parseEnv = () => {
