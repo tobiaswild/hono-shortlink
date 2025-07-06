@@ -16,7 +16,10 @@ app.post('/', requireAuth, async (c) => {
   const customCode = formData.get('customCode') as string;
 
   if (!url) {
-    setFlash(c, 'URL is required');
+    setFlash(c, {
+      type: 'error',
+      message: 'URL is required',
+    });
 
     return c.redirect('/dashboard');
   }
@@ -29,7 +32,10 @@ app.post('/', requireAuth, async (c) => {
     } catch (err) {
       console.error(err);
 
-      setFlash(c, 'Failed to create shortlink');
+      setFlash(c, {
+        type: 'error',
+        message: 'Failed to create shortlink',
+      });
 
       return c.redirect('/dashboard');
     }
@@ -39,15 +45,24 @@ app.post('/', requireAuth, async (c) => {
     await shortlinkStore.set(code, url, user.id);
   } catch (err) {
     if (err instanceof Error) {
-      setFlash(c, err.message);
+      setFlash(c, {
+        type: 'error',
+        message: err.message,
+      });
     } else {
-      setFlash(c, 'an error occured');
+      setFlash(c, {
+        type: 'error',
+        message: 'an error occured',
+      });
     }
 
     return c.redirect('/dashboard');
   }
 
-  setFlash(c, 'Shortlink created');
+  setFlash(c, {
+    type: 'success',
+    message: 'Shortlink created',
+  });
 
   return c.redirect('/dashboard');
 });
@@ -61,19 +76,28 @@ app.post('/:code/delete', requireAuth, async (c) => {
 
   const shortlinkUrl = await shortlinkStore.get(code);
   if (!shortlinkUrl) {
-    setFlash(c, 'Shortlink not found');
+    setFlash(c, {
+      type: 'error',
+      message: 'Shortlink not found',
+    });
 
     return c.redirect('/dashboard');
   }
 
   const deleted = await shortlinkStore.deleteByUserId(code, user.id);
   if (!deleted) {
-    setFlash(c, 'Failed to delete shortlink');
+    setFlash(c, {
+      type: 'error',
+      message: 'Failed to delete shortlink',
+    });
 
     return c.redirect('/dashboard');
   }
 
-  setFlash(c, 'Shortlink deleted');
+  setFlash(c, {
+    type: 'error',
+    message: 'Shortlink deleted',
+  });
 
   return c.redirect('/dashboard');
 });

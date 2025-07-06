@@ -1,4 +1,6 @@
+import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
+import { z } from 'zod/v4';
 import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
 import userStore from '@/db/store/user.js';
@@ -15,62 +17,71 @@ app.get('/', (c) => {
   return c.html(RegisterPage({ flash }));
 });
 
-app.post('/', async (c) => {
-  const formData = await c.req.formData();
-  const username = formData.get('username') as string;
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
+app.post(
+  '/',
+  zValidator(
+    'form',
+    z.object({
+      username: z.string(),
+      password: z.string(),
+      confirmPassword: z.string(),
+    }),
+  ),
+  async (c) => {
+    const validated = c.req.valid('form');
+    const username = validated.username;
+    const password = validated.password;
+    const confirmPassword = validated.confirmPassword;
 
-  if (!username || !password || !confirmPassword) {
-    setFlash(c, 'Username and password are required');
+    if (!username || !password || !confirmPassword) {
+      setFlash(c, {
+        type: 'error',
+        message: 'Username and password are required',
+      });
 
-    return c.redirect('/auth/register');
-  }
+      return c.redirect('/auth/register');
+    }
 
-  if (password !== confirmPassword) {
-    setFlash(c, 'Passwords do not match');
+    if (password !== confirmPassword) {
+      setFlash(c, { type: 'error', message: 'Passwords do not match' });
 
-    return c.redirect('/auth/register');
-  }
+      return c.redirect('/auth/register');
+    }
 
-  if (password.length < 6) {
-    setFlash(c, 'Password must be at least 6 characters long');
+    if (password.length < 6) {
+      setFlash(c, {
+        type: 'error',
+        message: 'Password must be at least 6 characters long',
+      });
 
-    return c.redirect('/auth/register');
-  }
+      return c.redirect('/auth/register');
+    }
 
-  const existingUser = await userStore.getByUsername(username);
-  if (existingUser) {
-    setFlash(c, 'Username already exists');
+    const existingUser = await userStore.getByUsername(username);
+    if (existingUser) {
+      setFlash(c, { type: 'error', message: 'Username already exists' });
 
-    return c.redirect('/auth/register');
-  }
+      return c.redirect('/auth/register');
+    }
 
-  const email = formData.get('email') as string;
+    const hashedPassword = await hashPassword(password);
+    const _result = await userStore.create(username, hashedPassword);
 
-  if (!email || !email.includes('@')) {
-    setFlash(c, 'Invalid email address');
+    const newUser = await userStore.getByUsername(username);
+    if (!newUser) {
+      setFlash(c, { type: 'error', message: 'Failed to create user' });
 
-    return c.redirect('/auth/register');
-  }
+      return c.redirect('/auth/register');
+    }
 
-  const hashedPassword = await hashPassword(password);
-  const _result = await userStore.create(username, email, hashedPassword);
+    const sessionId = crypto.randomUUID();
+    const expires = Date.now() + APP_CONFIG.SESSION_MAX_AGE;
+    await sessionStore.set(sessionId, newUser.id, expires);
 
-  const newUser = await userStore.getByUsername(username);
-  if (!newUser) {
-    setFlash(c, 'Failed to create user');
+    setSession(c, sessionId);
 
-    return c.redirect('/auth/register');
-  }
-
-  const sessionId = crypto.randomUUID();
-  const expires = Date.now() + APP_CONFIG.SESSION_MAX_AGE;
-  await sessionStore.set(sessionId, newUser.id, expires);
-
-  setSession(c, sessionId);
-
-  return c.redirect('/dashboard');
-});
+    return c.redirect('/dashboard');
+  },
+);
 
 export default app;

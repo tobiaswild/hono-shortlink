@@ -11,6 +11,8 @@ export const requireAuth = async (c: Context, next: Next) => {
 
   const hasSession = await sessionStore.has(sessionId);
   if (!hasSession) {
+    deleteSession(c);
+
     return c.redirect('/auth/login');
   }
 

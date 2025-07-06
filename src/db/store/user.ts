@@ -17,22 +17,15 @@ export default {
       .where(eq(userTable.username, username));
     return result[0];
   },
-  async getByEmail(email: string) {
-    const result = await db
-      .select()
-      .from(userTable)
-      .where(eq(userTable.email, email));
-    return result[0];
-  },
-  async create(username: string, email: string, passwordHash: string) {
+  async create(username: string, passwordHash: string) {
     const result = await db
       .insert(userTable)
-      .values({ username, email, passwordHash });
+      .values({ username, passwordHash });
     return result;
   },
   async update(
     id: number,
-    data: Partial<{ username: string; email: string; passwordHash: string }>,
+    data: Partial<{ username: string; passwordHash: string }>,
   ) {
     const result = await db
       .update(userTable)

@@ -1,85 +1,62 @@
-import { cx } from 'hono/css';
-import { styles } from '@/styles/main.js';
+import Alert from '@/components/alert.js';
+import Button from '@/components/button.js';
+import Container from '@/components/container.js';
+import Form from '@/components/form.js';
+import FormGroup from '@/components/form-group.js';
+import Heading from '@/components/heading.js';
+import Input from '@/components/input.js';
+import InputLabel from '@/components/input-label.js';
+import Link from '@/components/link.js';
+import type { Flash } from '@/util/flash.js';
 import Layout from './layout.js';
 
-export default function RegisterPage({ flash }: { flash?: string }) {
+export default function RegisterPage({ flash }: { flash?: Flash }) {
   return (
     <Layout title="Register">
-      <div class={styles.loginContainer}>
-        <div class={styles.loginForm}>
-          <h2 class={styles.loginFormH2}>📝 Register</h2>
-          {flash && <p class="text-red-500">{flash}</p>}
-          <form class="mt-8 space-y-6" action="/auth/register" method="post">
-            <div class={styles.formGroup}>
-              <label for="username" class={styles.formGroupLabel}>
-                Username:
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                class={styles.formGroupInput}
-                placeholder="Username"
-              />
-            </div>
-            <div class={styles.formGroup}>
-              <label for="email" class={styles.formGroupLabel}>
-                Email address:
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                class={styles.formGroupInput}
-                placeholder="Email address"
-              />
-            </div>
-            <div class={styles.formGroup}>
-              <label for="password" class={styles.formGroupLabel}>
-                Password:
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                class={styles.formGroupInput}
-                placeholder="Password"
-              />
-            </div>
-            <div class={styles.formGroup}>
-              <label for="confirmPassword" class={styles.formGroupLabel}>
-                Confirm Password:
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                class={styles.formGroupInput}
-                placeholder="Confirm Password"
-              />
-            </div>
-            <button
-              type="submit"
-              class={cx(styles.btn, styles.btnPrimary, styles.btnFull)}
-            >
-              Create account
-            </button>
-          </form>
-          <p class="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <a
-              href="/auth/login"
-              class="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Sign in here
-            </a>
-          </p>
-        </div>
-      </div>
+      <Container variant="centered">
+        <Heading level="h2">📝 Register</Heading>
+
+        <Alert flash={flash} />
+
+        <Form action="/auth/register" method="post">
+          <FormGroup>
+            <InputLabel forId="username">Username:</InputLabel>
+            <Input
+              id="username"
+              name="username"
+              type="text"
+              required
+              placeholder="Username"
+            />
+          </FormGroup>
+          <FormGroup>
+            <InputLabel forId="password">Password:</InputLabel>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              required
+              placeholder="Password"
+            />
+          </FormGroup>
+          <FormGroup>
+            <InputLabel forId="confirmPassword">Confirm Password:</InputLabel>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              required
+              placeholder="Confirm Password"
+            />
+          </FormGroup>
+          <Button type="submit" fullWidth={true} size="large">
+            Create account
+          </Button>
+        </Form>
+        <p>
+          Already have an account? <Link href="/auth/login">Sign in here</Link>
+        </p>
+      </Container>
     </Layout>
   );
 }

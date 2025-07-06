@@ -1,4 +1,6 @@
+import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
+import { z } from 'zod/v4';
 import { APP_CONFIG } from '@/config/app.js';
 import sessionStore from '@/db/store/session.js';
 import userStore from '@/db/store/user.js';
@@ -12,43 +14,54 @@ const app = new Hono();
 app.get('/', (c) => {
   const flash = getFlash(c);
 
-  console.log(flash);
-
   return c.html(LoginPage({ flash }));
 });
 
-app.post('/', async (c) => {
-  const formData = await c.req.formData();
-  const username = formData.get('username') as string;
-  const password = formData.get('password') as string;
+app.post(
+  '/',
+  zValidator(
+    'form',
+    z.object({
+      username: z.string(),
+      password: z.string(),
+    }),
+  ),
+  async (c) => {
+    const validated = c.req.valid('form');
+    const username = validated.username;
+    const password = validated.password;
 
-  if (!username || !password) {
-    setFlash(c, 'Username and password are required');
+    if (!username || !password) {
+      setFlash(c, {
+        type: 'error',
+        message: 'Username and password are required',
+      });
 
-    return c.redirect('/auth/login');
-  }
+      return c.redirect('/auth/login');
+    }
 
-  const user = await userStore.getByUsername(username);
-  if (!user) {
-    setFlash(c, 'Invalid username or password');
+    const user = await userStore.getByUsername(username);
+    if (!user) {
+      setFlash(c, { type: 'error', message: 'Invalid username or password' });
 
-    return c.redirect('/auth/login');
-  }
+      return c.redirect('/auth/login');
+    }
 
-  const isValidPassword = await verifyPassword(password, user.passwordHash);
-  if (!isValidPassword) {
-    setFlash(c, 'Invalid username or password');
+    const isValidPassword = await verifyPassword(password, user.passwordHash);
+    if (!isValidPassword) {
+      setFlash(c, { type: 'error', message: 'Invalid username or password' });
 
-    return c.redirect('/auth/login');
-  }
+      return c.redirect('/auth/login');
+    }
 
-  const sessionId = crypto.randomUUID();
-  const expires = Date.now() + APP_CONFIG.SESSION_MAX_AGE;
-  await sessionStore.set(sessionId, user.id, expires);
+    const sessionId = crypto.randomUUID();
+    const expires = Date.now() + APP_CONFIG.SESSION_MAX_AGE;
+    await sessionStore.set(sessionId, user.id, expires);
 
-  setSession(c, sessionId);
+    setSession(c, sessionId);
 
-  return c.redirect('/dashboard');
-});
+    return c.redirect('/dashboard');
+  },
+);
 
 export default app;

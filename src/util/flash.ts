@@ -1,8 +1,8 @@
 import type { Context } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
 
-export const setFlash = (c: Context, message: string) => {
-  setCookie(c, 'flash', message, {
+export const setFlash = (c: Context, flash: Flash) => {
+  setCookie(c, 'flash', JSON.stringify(flash), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -11,5 +11,18 @@ export const setFlash = (c: Context, message: string) => {
 };
 
 export const getFlash = (c: Context) => {
-  return deleteCookie(c, 'flash');
+  const flash = deleteCookie(c, 'flash');
+
+  if (!flash) {
+    return undefined;
+  }
+
+  return JSON.parse(flash) as Flash;
+};
+
+export type FlashType = 'success' | 'error' | 'neutral';
+
+export type Flash = {
+  type: FlashType;
+  message: string;
 };
