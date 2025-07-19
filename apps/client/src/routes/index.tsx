@@ -1,11 +1,16 @@
 import type { ApiResponse } from '@repo/types';
+import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import beaver from './assets/beaver.svg';
+import beaver from '../assets/beaver.svg';
 import './App.css';
+
+export const Route = createFileRoute('/')({
+  component: Index,
+});
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
-function App() {
+function Index() {
   const [data, setData] = useState<ApiResponse | undefined>();
 
   async function sendRequest() {
@@ -58,5 +63,3 @@ function App() {
     </>
   );
 }
-
-export default App;
