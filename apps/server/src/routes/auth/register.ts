@@ -4,18 +4,10 @@ import { z } from 'zod/v4';
 import { APP_CONFIG } from '../../config/app.js';
 import sessionStore from '../../db/store/session.js';
 import userStore from '../../db/store/user.js';
-import RegisterPage from '../../templates/register.js';
-import { getFlash, setFlash } from '../../util/flash.js';
 import { hashPassword } from '../../util/password.js';
 import { setSession } from '../../util/session.js';
 
 const app = new Hono();
-
-app.get('/', (c) => {
-  const flash = getFlash(c);
-
-  return c.html(RegisterPage({ flash }));
-});
 
 app.post(
   '/',
@@ -34,34 +26,26 @@ app.post(
     const confirmPassword = validated.confirmPassword;
 
     if (!username || !password || !confirmPassword) {
-      setFlash(c, {
+      return c.json({
         type: 'error',
         message: 'Username and password are required',
       });
-
-      return c.redirect('/auth/register');
     }
 
     if (password !== confirmPassword) {
-      setFlash(c, { type: 'error', message: 'Passwords do not match' });
-
-      return c.redirect('/auth/register');
+      return c.json({ type: 'error', message: 'Passwords do not match' });
     }
 
     if (password.length < 6) {
-      setFlash(c, {
+      return c.json({
         type: 'error',
         message: 'Password must be at least 6 characters long',
       });
-
-      return c.redirect('/auth/register');
     }
 
     const existingUser = await userStore.getByUsername(username);
     if (existingUser) {
-      setFlash(c, { type: 'error', message: 'Username already exists' });
-
-      return c.redirect('/auth/register');
+      return c.json({ type: 'error', message: 'Username already exists' });
     }
 
     const hashedPassword = await hashPassword(password);
@@ -69,9 +53,7 @@ app.post(
 
     const newUser = await userStore.getByUsername(username);
     if (!newUser) {
-      setFlash(c, { type: 'error', message: 'Failed to create user' });
-
-      return c.redirect('/auth/register');
+      return c.json({ type: 'error', message: 'Failed to create user' });
     }
 
     const sessionId = crypto.randomUUID();
@@ -80,7 +62,9 @@ app.post(
 
     setSession(c, sessionId);
 
-    return c.redirect('/dashboard');
+    return c.json({
+      success: true,
+    });
   },
 );
 

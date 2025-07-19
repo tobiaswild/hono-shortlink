@@ -6,14 +6,26 @@ import { deleteSession, getSession } from '../util/session.js';
 export const requireAuth = async (c: Context, next: Next) => {
   const sessionId = getSession(c);
   if (!sessionId) {
-    return c.redirect('/auth/login');
+    return c.json(
+      {
+        success: false,
+        message: 'an error occured',
+      },
+      400,
+    );
   }
 
   const hasSession = await sessionStore.has(sessionId);
   if (!hasSession) {
     deleteSession(c);
 
-    return c.redirect('/auth/login');
+    return c.json(
+      {
+        success: false,
+        message: 'an error occured',
+      },
+      400,
+    );
   }
 
   const session = await sessionStore.get(sessionId);
@@ -22,7 +34,13 @@ export const requireAuth = async (c: Context, next: Next) => {
 
     deleteSession(c);
 
-    return c.redirect('/auth/login');
+    return c.json(
+      {
+        success: false,
+        message: 'an error occured',
+      },
+      400,
+    );
   }
 
   if (session.expires < Date.now()) {
@@ -30,7 +48,13 @@ export const requireAuth = async (c: Context, next: Next) => {
 
     deleteSession(c);
 
-    return c.redirect('/auth/login');
+    return c.json(
+      {
+        success: false,
+        message: 'an error occured',
+      },
+      400,
+    );
   }
 
   const user = await userStore.getById(session.userId);
@@ -39,7 +63,13 @@ export const requireAuth = async (c: Context, next: Next) => {
 
     deleteSession(c);
 
-    return c.redirect('/auth/login');
+    return c.json(
+      {
+        success: false,
+        message: 'an error occured',
+      },
+      400,
+    );
   }
 
   c.set('user', user);

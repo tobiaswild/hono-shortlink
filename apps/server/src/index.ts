@@ -1,7 +1,6 @@
 import { env } from './config/env.js';
 import urlStore from './db/store/shortlink.js';
 import authRoutes from './routes/auth/index.js';
-import dashboardRoutes from './routes/dashboard.js';
 import shortlinksRoutes from './routes/shortlinks.js';
 import './types/context.js';
 import { serve } from '@hono/node-server';
@@ -21,7 +20,6 @@ app.use('/static/*', serveStatic({ root: './' }));
 app.use('/favicon.ico', serveStatic({ path: './static/favicon.svg' }));
 
 app.route('/auth', authRoutes);
-app.route('/dashboard', dashboardRoutes);
 app.route('/shortlinks', shortlinksRoutes);
 
 app.get('/hello', async (c) => {

@@ -4,54 +4,58 @@ import { z } from 'zod/v4';
 import { APP_CONFIG } from '../../config/app.js';
 import sessionStore from '../../db/store/session.js';
 import userStore from '../../db/store/user.js';
-import LoginPage from '../../templates/login.js';
-import { getFlash, setFlash } from '../../util/flash.js';
 import { verifyPassword } from '../../util/password.js';
 import { setSession } from '../../util/session.js';
 
 const app = new Hono();
 
-app.get('/', (c) => {
-  const flash = getFlash(c);
-
-  return c.html(LoginPage({ flash }));
-});
-
 app.post(
   '/',
   zValidator(
-    'form',
+    'json',
     z.object({
       username: z.string(),
       password: z.string(),
     }),
   ),
   async (c) => {
-    const validated = c.req.valid('form');
+    const validated = c.req.valid('json');
     const username = validated.username;
     const password = validated.password;
 
     if (!username || !password) {
-      setFlash(c, {
-        type: 'error',
-        message: 'Username and password are required',
-      });
-
-      return c.redirect('/auth/login');
+      return c.json(
+        {
+          success: false,
+          type: 'error',
+          message: 'Username and password are required',
+        },
+        400,
+      );
     }
 
     const user = await userStore.getByUsername(username);
     if (!user) {
-      setFlash(c, { type: 'error', message: 'Invalid username or password' });
-
-      return c.redirect('/auth/login');
+      return c.json(
+        {
+          success: false,
+          type: 'error',
+          message: 'Invalid username or password',
+        },
+        400,
+      );
     }
 
     const isValidPassword = await verifyPassword(password, user.passwordHash);
     if (!isValidPassword) {
-      setFlash(c, { type: 'error', message: 'Invalid username or password' });
-
-      return c.redirect('/auth/login');
+      return c.json(
+        {
+          success: false,
+          type: 'error',
+          message: 'Invalid username or password',
+        },
+        400,
+      );
     }
 
     const sessionId = crypto.randomUUID();
@@ -60,7 +64,10 @@ app.post(
 
     setSession(c, sessionId);
 
-    return c.redirect('/dashboard');
+    return c.json({
+      success: true,
+      message: 'your logged in',
+    });
   },
 );
 

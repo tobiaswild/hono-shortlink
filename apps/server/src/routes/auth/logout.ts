@@ -13,7 +13,10 @@ app.post('/', requireAuth, async (c) => {
 
   deleteSession(c);
 
-  return c.redirect('/auth/login');
+  return c.json({
+    success: true,
+    message: 'you got logged out',
+  });
 });
 
 export default app;
