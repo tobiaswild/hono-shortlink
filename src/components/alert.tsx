@@ -22,13 +22,13 @@ export default function Alert({ flash }: { flash?: Flash }) {
   `,
   };
 
-  if (flash) {
-    return (
-      <div class={cx(alertClass, variantClasses[flash?.type])}>
-        {flash.message}
-      </div>
-    );
+  if (!flash) {
+    return null;
   }
 
-  return null;
+  return (
+    <div class={cx(alertClass, variantClasses[flash?.type])}>
+      {flash.message}
+    </div>
+  );
 }

@@ -5,21 +5,16 @@ import { btnClass, primaryClass } from './button.js';
 export default function Link({
   children,
   href,
-  target,
+  target = '_self',
   variant = 'normal',
 }: PropsWithChildren<{
-  href?: string | undefined;
-  target?: string | undefined;
+  href?: string;
+  target?: '_self' | '_blank' | '_parent' | '_top';
   variant?: 'normal' | 'button';
 }>) {
   const variantClasses = {
     normal: '',
-    button: cx(
-      btnClass,
-      primaryClass,
-      css`
-        text-decoration: none;`,
-    ),
+    button: cx(btnClass, primaryClass, css`text-decoration: none;`),
   };
 
   return (

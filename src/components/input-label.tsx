@@ -3,9 +3,9 @@ import type { PropsWithChildren } from 'hono/jsx';
 
 export default function InputLabel({
   children,
-  forId,
+  for: forId,
 }: PropsWithChildren<{
-  forId?: string | undefined;
+  for?: string | undefined;
 }>) {
   const formGroupLabel = css`
     display: block;

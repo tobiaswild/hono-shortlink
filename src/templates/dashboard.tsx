@@ -122,7 +122,7 @@ export default function DashboardPage({
           <Heading level="h2">➕ Create New Shortlink</Heading>
           <Form method="post" action="/shortlinks">
             <FormGroup>
-              <InputLabel forId="url">Target URL:</InputLabel>
+              <InputLabel for="url">Target URL:</InputLabel>
               <Input
                 type="url"
                 id="url"
@@ -132,7 +132,7 @@ export default function DashboardPage({
               />
             </FormGroup>
             <FormGroup>
-              <InputLabel forId="customCode">
+              <InputLabel for="customCode">
                 Custom Code (optional, 6 characters):
               </InputLabel>
               <Input
@@ -182,7 +182,7 @@ export default function DashboardPage({
                   <TableData class={styles.buttons}>
                     <Link
                       href={`${baseUrl}/${link.code}`}
-                      target={'_blank'}
+                      target="_blank"
                       variant="button"
                     >
                       Open

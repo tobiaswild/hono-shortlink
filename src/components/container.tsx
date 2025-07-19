@@ -16,11 +16,14 @@ export default function Container({
 
     const box = css`
   background: white;
-  padding: 40px;
-  border-radius: 8px;
+  padding: 2.5rem;
+  border-radius: 0.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 30rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 `;
 
     return (

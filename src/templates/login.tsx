@@ -14,13 +14,15 @@ export default function LoginPage({ flash }: { flash?: Flash }) {
   return (
     <Layout title="Admin Login">
       <Container variant="centered">
-        <Heading level="h1">🔐 Admin Login</Heading>
+        <Heading level="h1" centered={true}>
+          🔐 Admin Login
+        </Heading>
 
         <Alert flash={flash} />
 
         <Form method="post" action="/auth/login">
           <FormGroup>
-            <InputLabel forId="username">Username:</InputLabel>
+            <InputLabel for="username">Username:</InputLabel>
             <Input
               type="text"
               id="username"
@@ -30,7 +32,7 @@ export default function LoginPage({ flash }: { flash?: Flash }) {
             />
           </FormGroup>
           <FormGroup>
-            <InputLabel forId="password">Password:</InputLabel>
+            <InputLabel for="password">Password:</InputLabel>
             <Input
               type="password"
               id="password"

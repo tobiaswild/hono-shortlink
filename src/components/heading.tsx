@@ -7,6 +7,7 @@ interface HeadingProps extends PropsWithChildren {
   level?: HeadingLevel;
   class?: string;
   style?: string;
+  centered?: boolean;
 }
 
 export default function Heading({
@@ -14,6 +15,7 @@ export default function Heading({
   level = 'h2',
   class: className,
   style,
+  centered = false,
 }: HeadingProps) {
   // Use existing styles or create simple heading styles
   const headingClasses = {
@@ -28,16 +30,23 @@ export default function Heading({
     padding-bottom: 10px;
   `,
     h3: css`
-    text-align: center;
     margin-bottom: 30px;
     color: #2563eb;
   `,
-    h4: 'text-lg font-medium text-gray-700 mb-2',
-    h5: 'text-base font-medium text-gray-600 mb-1',
-    h6: 'text-sm font-medium text-gray-500 mb-1',
+    h4: '',
+    h5: '',
+    h6: '',
   };
 
-  const classes = cx(headingClasses[level], className);
+  const centeredClasses = css`
+    text-align: center;
+  `;
+
+  const classes = cx(
+    headingClasses[level],
+    className,
+    centered ? centeredClasses : null,
+  );
 
   const props = {
     class: classes,

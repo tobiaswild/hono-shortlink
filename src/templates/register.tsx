@@ -14,13 +14,15 @@ export default function RegisterPage({ flash }: { flash?: Flash }) {
   return (
     <Layout title="Register">
       <Container variant="centered">
-        <Heading level="h2">📝 Register</Heading>
+        <Heading level="h2" centered={true}>
+          📝 Register
+        </Heading>
 
         <Alert flash={flash} />
 
         <Form action="/auth/register" method="post">
           <FormGroup>
-            <InputLabel forId="username">Username:</InputLabel>
+            <InputLabel for="username">Username:</InputLabel>
             <Input
               id="username"
               name="username"
@@ -30,7 +32,7 @@ export default function RegisterPage({ flash }: { flash?: Flash }) {
             />
           </FormGroup>
           <FormGroup>
-            <InputLabel forId="password">Password:</InputLabel>
+            <InputLabel for="password">Password:</InputLabel>
             <Input
               id="password"
               name="password"
@@ -40,7 +42,7 @@ export default function RegisterPage({ flash }: { flash?: Flash }) {
             />
           </FormGroup>
           <FormGroup>
-            <InputLabel forId="confirmPassword">Confirm Password:</InputLabel>
+            <InputLabel for="confirmPassword">Confirm Password:</InputLabel>
             <Input
               id="confirmPassword"
               name="confirmPassword"
