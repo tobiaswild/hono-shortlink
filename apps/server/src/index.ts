@@ -6,11 +6,11 @@ import shortlinksRoutes from './routes/shortlinks.js';
 import './types/context.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
+import type { ApiResponse } from '@repo/types';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { showRoutes } from 'hono/dev';
 import { logger } from 'hono/logger';
-import type { ApiResponse } from '@repo/types';
-import { cors } from 'hono/cors';
 
 const app = new Hono();
 
