@@ -1,8 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
-import beaver from '../assets/beaver.svg';
-import '../App.css';
 import type { ApiResponse } from '@repo/types';
 import { useQuery } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
+import beaver from '../assets/beaver.svg';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -32,19 +31,23 @@ function Index() {
           target="_blank"
           rel="noopener"
         >
-          <img src={beaver} className="logo" alt="beaver logo" />
+          <img
+            src={beaver}
+            className="h-24 animate-logo-spin p-6 transition will-change-auto hover:drop-shadow-2xl hover:drop-shadow-blue-600"
+            alt="beaver logo"
+          />
         </a>
       </div>
-      <h1>bhvr</h1>
+      <h1 className="text-5xl">bhvr</h1>
       <h2>Bun + Hono + Vite + React</h2>
       <p>A typesafe fullstack monorepo</p>
-      <div className="card">
-        <div className="button-container">
+      <div className="p-8">
+        <div className="flex items-center gap-8">
           <button onClick={() => refetch()} type="button">
             Call API
           </button>
           <a
-            className="docs-link"
+            className="cursor-pointer rounded border border-transparent border-solid bg-neutral-900 px-5 py-2.5 font-medium text-white transition hover:border-blue-900 focus:outline-4"
             target="_blank"
             href="https://bhvr.dev"
             rel="noopener"
@@ -53,7 +56,7 @@ function Index() {
           </a>
         </div>
         {data && (
-          <pre className="response">
+          <pre className="rounded-2xl bg-gray-600 p-8 dark:bg-amber-500">
             <code>
               Message: {data.message} <br />
               Success: {data.success.toString()}
