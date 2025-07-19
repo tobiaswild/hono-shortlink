@@ -1,6 +1,6 @@
 import { and, eq, gte } from 'drizzle-orm';
-import db from '@/db/index.js';
-import sessionTable from '@/db/schema/session.js';
+import db from '../index.js';
+import sessionTable from '../schema/session.js';
 
 export default {
   async get(code: string) {

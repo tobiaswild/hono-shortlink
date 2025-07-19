@@ -1,13 +1,13 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod/v4';
-import { APP_CONFIG } from '@/config/app.js';
-import sessionStore from '@/db/store/session.js';
-import userStore from '@/db/store/user.js';
-import RegisterPage from '@/templates/register.js';
-import { getFlash, setFlash } from '@/util/flash.js';
-import { hashPassword } from '@/util/password.js';
-import { setSession } from '@/util/session.js';
+import { APP_CONFIG } from '../../config/app.js';
+import sessionStore from '../../db/store/session.js';
+import userStore from '../../db/store/user.js';
+import RegisterPage from '../../templates/register.js';
+import { getFlash, setFlash } from '../../util/flash.js';
+import { hashPassword } from '../../util/password.js';
+import { setSession } from '../../util/session.js';
 
 const app = new Hono();
 

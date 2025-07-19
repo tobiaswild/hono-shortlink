@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
-import shortlinkStore from '@/db/store/shortlink.js';
-import { requireAuth } from '@/middleware/auth.js';
-import { getCode } from '@/util/code.js';
-import { setFlash } from '@/util/flash.js';
+import shortlinkStore from '../db/store/shortlink.js';
+import { requireAuth } from '../middleware/auth.js';
+import { getCode } from '../util/code.js';
+import { setFlash } from '../util/flash.js';
 
 const app = new Hono();
 

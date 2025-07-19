@@ -10,10 +10,8 @@
     "jsxImportSource": "hono/jsx",
     "outDir": "./dist",
     "moduleResolution": "nodenext",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "baseUrl": "."
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "include": ["src/**/*"]
 }

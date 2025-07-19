@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
-import db from '@/db/index.js';
-import userTable from '@/db/schema/user.js';
+import db from '../index.js';
+import userTable from '../schema/user.js';
 
 export default {
   async getById(id: number) {

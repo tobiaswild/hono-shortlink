@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
-import sessionStore from '@/db/store/session.js';
-import { requireAuth } from '@/middleware/auth.js';
-import { deleteSession, getSession } from '@/util/session.js';
+import sessionStore from '../../db/store/session.js';
+import { requireAuth } from '../../middleware/auth.js';
+import { deleteSession, getSession } from '../../util/session.js';
 
 const app = new Hono();
 

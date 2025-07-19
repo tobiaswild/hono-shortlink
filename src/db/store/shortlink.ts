@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
-import db from '@/db/index.js';
-import shortlinkTable from '@/db/schema/shortlink.js';
+import db from '../index.js';
+import shortlinkTable from '../schema/shortlink.js';
 
 export default {
   async get(code: string) {

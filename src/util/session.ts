@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
-import { APP_CONFIG } from '@/config/app.js';
+import { APP_CONFIG } from '../config/app.js';
 
 export const setSession = (c: Context, sessionId: string) => {
   setCookie(c, APP_CONFIG.SESSION_COOKIE, sessionId, {

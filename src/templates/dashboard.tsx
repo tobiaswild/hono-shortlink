@@ -1,23 +1,23 @@
 import { css } from 'hono/css';
-import Alert from '@/components/alert.js';
-import Button from '@/components/button.js';
-import Container from '@/components/container.js';
-import Form from '@/components/form.js';
-import FormGroup from '@/components/form-group.js';
-import Heading from '@/components/heading.js';
-import Input from '@/components/input.js';
-import InputLabel from '@/components/input-label.js';
-import Link from '@/components/link.js';
-import Table from '@/components/table.js';
-import TableBody from '@/components/table-body.js';
-import TableData from '@/components/table-data.js';
-import TableHead from '@/components/table-head.js';
-import TableHeader from '@/components/table-header.js';
-import TableRow from '@/components/table-row.js';
-import type { User } from '@/db/schema/user.js';
-import type { Shortlink } from '@/db/types/shortlink.js';
-import Layout from '@/templates/layout.js';
-import type { Flash } from '@/util/flash.js';
+import Alert from '../components/alert.js';
+import Button from '../components/button.js';
+import Container from '../components/container.js';
+import Form from '../components/form.js';
+import FormGroup from '../components/form-group.js';
+import Heading from '../components/heading.js';
+import Input from '../components/input.js';
+import InputLabel from '../components/input-label.js';
+import Link from '../components/link.js';
+import Table from '../components/table.js';
+import TableBody from '../components/table-body.js';
+import TableData from '../components/table-data.js';
+import TableHead from '../components/table-head.js';
+import TableHeader from '../components/table-header.js';
+import TableRow from '../components/table-row.js';
+import type { User } from '../db/schema/user.js';
+import type { Shortlink } from '../db/types/shortlink.js';
+import type { Flash } from '../util/flash.js';
+import Layout from './layout.js';
 
 export default function DashboardPage({
   shortlinks,

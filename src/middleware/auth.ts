@@ -1,7 +1,7 @@
 import type { Context, Next } from 'hono';
-import sessionStore from '@/db/store/session.js';
-import userStore from '@/db/store/user.js';
-import { deleteSession, getSession } from '@/util/session.js';
+import sessionStore from '../db/store/session.js';
+import userStore from '../db/store/user.js';
+import { deleteSession, getSession } from '../util/session.js';
 
 export const requireAuth = async (c: Context, next: Next) => {
   const sessionId = getSession(c);

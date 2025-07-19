@@ -1,5 +1,5 @@
 import { css, cx } from 'hono/css';
-import type { Flash } from '@/util/flash.js';
+import type { Flash } from '../util/flash.js';
 
 export default function Alert({ flash }: { flash?: Flash }) {
   const alertClass = css`

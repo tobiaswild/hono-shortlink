@@ -1,9 +1,9 @@
-import { env } from '@/config/env.js';
-import urlStore from '@/db/store/shortlink.js';
-import authRoutes from '@/routes/auth/index.js';
-import dashboardRoutes from '@/routes/dashboard.js';
-import shortlinksRoutes from '@/routes/shortlinks.js';
-import '@/types/context.js';
+import { env } from './config/env.js';
+import urlStore from './db/store/shortlink.js';
+import authRoutes from './routes/auth/index.js';
+import dashboardRoutes from './routes/dashboard.js';
+import shortlinksRoutes from './routes/shortlinks.js';
+import './types/context.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';

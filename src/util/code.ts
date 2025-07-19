@@ -1,5 +1,5 @@
-import { APP_CONFIG } from '@/config/app.js';
-import shortlinkStore from '@/db/store/shortlink.js';
+import { APP_CONFIG } from '../config/app.js';
+import shortlinkStore from '../db/store/shortlink.js';
 
 export async function getCode() {
   let code: string;

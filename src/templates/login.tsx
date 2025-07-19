@@ -1,13 +1,13 @@
-import Alert from '@/components/alert.js';
-import Button from '@/components/button.js';
-import Container from '@/components/container.js';
-import Form from '@/components/form.js';
-import FormGroup from '@/components/form-group.js';
-import Heading from '@/components/heading.js';
-import Input from '@/components/input.js';
-import InputLabel from '@/components/input-label.js';
-import Link from '@/components/link.js';
-import type { Flash } from '@/util/flash.js';
+import Alert from '../components/alert.js';
+import Button from '../components/button.js';
+import Container from '../components/container.js';
+import Form from '../components/form.js';
+import FormGroup from '../components/form-group.js';
+import Heading from '../components/heading.js';
+import Input from '../components/input.js';
+import InputLabel from '../components/input-label.js';
+import Link from '../components/link.js';
+import type { Flash } from '../util/flash.js';
 import Layout from './layout.js';
 
 export default function LoginPage({ flash }: { flash?: Flash }) {

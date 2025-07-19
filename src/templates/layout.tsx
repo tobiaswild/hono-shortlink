@@ -1,6 +1,6 @@
 import { css, Style } from 'hono/css';
 import type { PropsWithChildren } from 'hono/jsx';
-import { APP_CONFIG } from '@/config/app.js';
+import { APP_CONFIG } from '../config/app.js';
 
 export default function Layout({
   children,
