@@ -1,135 +1,178 @@
-# Turborepo starter
+# hono-shortlink
 
-This Turborepo starter is maintained by the Turborepo core team.
+A multi-user URL shortener service built with [Hono](https://hono.dev/) and Node.js, using TypeScript and SQLite for persistent storage.
 
-## Using this example
+## Features
 
-Run the following command:
+- **Multi-user support** with secure authentication
+- User registration and login system
+- Create shortlinks for any URL
+- Redirect shortlinks to their original URLs
+- User-specific shortlink management
+- Persistent storage in SQLite database
+- Secure password hashing with bcrypt
+- Session-based authentication
+- Ready for deployment with GitHub Actions and pm2
 
-```sh
-npx create-turbo@latest
+## Setup
+
+1. **Install dependencies:**
+
+   ```bash
+   pnpm install
+   ```
+
+2. **Set up environment variables:**
+   Create a `.env` file in the root directory:
+
+   ```env
+   DB_FILE_NAME=shortlink.db
+   PORT=3000
+   ```
+
+3. **Set up the database:**
+
+   ```bash
+   pnpm db:push
+   ```
+
+4. **Start development server:**
+   ```bash
+   pnpm dev
+   ```
+
+The server will start at [http://localhost:3000](http://localhost:3000)
+
+## Multi-User Features
+
+### User Registration
+
+- Visit `/admin/register` to create a new account
+- Each user gets their own isolated shortlink space
+- Username and email must be unique
+
+### User Login
+
+- Visit `/admin/login` to sign in
+- Secure session-based authentication
+- Users can only see and manage their own shortlinks
+
+### Dashboard
+
+- View all your shortlinks
+- Create new shortlinks with custom codes
+- Delete your shortlinks
+- Copy shortlink URLs
+
+## Docker Usage
+
+This project is fully containerized and can be run locally or deployed using Docker.
+
+### Running Locally
+
+1.  **Build the image:**
+
+    ```bash
+    docker build -t hono-shortlink .
+    ```
+
+2.  **Run the container:**
+    ```bash
+    docker run --rm -it -p 3000:3000 --name my-shortlink-app hono-shortlink
+    ```
+    - `--rm`: Automatically removes the container when it exits.
+    - `-it`: Runs in interactive mode, allowing you to stop it with `Ctrl+C`.
+    - The server will be available at `http://localhost:3000`.
+
+### Running the Pre-built Image from GHCR
+
+A new image is automatically built and pushed to the GitHub Container Registry (GHCR) on every push to `main`. You can run the latest version directly:
+
+```bash
+docker run --rm -it -p 3000:3000 --name my-shortlink-app ghcr.io/tobiaswild/hono-shortlink:latest
 ```
 
-## What's inside?
+> **Note:** If the package is private, you may need to log in to GHCR first with `docker login ghcr.io`.
 
-This Turborepo includes the following packages/apps:
+### Graceful Shutdown
 
-### Apps and Packages
+The container is configured to handle `SIGINT` and `SIGTERM` signals, allowing for a graceful shutdown when you press `Ctrl+C` or run `docker stop`.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Build
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+pnpm run build
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## API
+
+### GET /:code
+
+Redirects to the original URL for the given shortlink code.
+
+### Admin Routes
+
+- **GET /admin/login** - Login page
+- **POST /admin/login** - User authentication
+- **GET /admin/register** - Registration page
+- **POST /admin/register** - User registration
+- **GET /admin/dashboard** - User dashboard (requires auth)
+- **POST /admin/create** - Create new shortlink (requires auth)
+- **POST /admin/delete/:code** - Delete shortlink (requires auth)
+- **POST /admin/logout** - Logout (requires auth)
+
+## Database
+
+- All data is stored in SQLite database
+- Users, sessions, and shortlinks are properly related
+- Data isolation ensures users can only access their own shortlinks
+- Uses Drizzle ORM for type-safe database operations
+
+## Database Management
+
+- **Push schema (dev)**: `pnpm db:push` - Pushes schema changes directly to database (development)
+- **Generate migrations**: `pnpm db:generate` - Creates migration files based on schema changes
+- **Run migrations**: `pnpm db:migrate` - Applies pending migrations to the database (production)
+- **View database**: `pnpm db:studio` - Opens Drizzle Studio to view and edit data
+
+## Security Features
+
+- Password hashing with bcrypt (12 rounds)
+- Session-based authentication
+- User data isolation
+- Secure cookie handling
+- Input validation with Zod
+
+## Deployment
+
+This project includes a GitHub Actions workflow for automated deployment to a Linux VM using SSH and pm2.
+
+### Requirements on your server
+
+- Node.js, pnpm, and pm2 installed
+- SSH access set up (private key added as a GitHub secret)
+- The repository cloned to your server
+
+### GitHub Secrets needed
+
+- `DEPLOY_SSH_PRIVATE_KEY`: SSH private key for deployment
+- `DEPLOY_REMOTE_HOST`: Server IP or hostname
+- `DEPLOY_REMOTE_USER`: SSH username
+- `DEPLOY_REMOTE_TARGET`: Path to deploy directory on server
+
+### How it works
+
+- On every push to `main`, the workflow builds the app and deploys the `dist/` folder to your server.
+- After deployment, pm2 reloads or starts the service automatically.
+
+## Docker Deployment
+
+This repository is also configured with a GitHub Actions workflow to automatically build and publish a Docker image to the GitHub Container Registry (GHCR) on every push to `main`. You can pull and run this image directly for deployment.
+
+---
+
+Feel free to fork, modify, and use for your own projects!
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+open http://localhost:3000
 ```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
