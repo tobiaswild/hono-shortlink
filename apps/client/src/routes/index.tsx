@@ -1,8 +1,8 @@
-import type { ApiResponse } from '@repo/types';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
 import beaver from '../assets/beaver.svg';
-import './App.css';
+import '../App.css';
+import type { ApiResponse } from '@repo/types';
+import { useQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -11,17 +11,18 @@ export const Route = createFileRoute('/')({
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
 function Index() {
-  const [data, setData] = useState<ApiResponse | undefined>();
+  const { error, data, isFetching, refetch } = useQuery({
+    queryKey: ['hello'],
+    queryFn: async (): Promise<ApiResponse> => {
+      const response = await fetch(`${SERVER_URL}/hello`);
+      return await response.json();
+    },
+    enabled: false,
+  });
 
-  async function sendRequest() {
-    try {
-      const req = await fetch(`${SERVER_URL}/hello`);
-      const res: ApiResponse = await req.json();
-      setData(res);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  if (isFetching) return 'Loading...';
+
+  if (error) return `An error has occurred: ${error.message}`;
 
   return (
     <>
@@ -39,7 +40,7 @@ function Index() {
       <p>A typesafe fullstack monorepo</p>
       <div className="card">
         <div className="button-container">
-          <button onClick={sendRequest} type="button">
+          <button onClick={() => refetch()} type="button">
             Call API
           </button>
           <a
