@@ -6,13 +6,16 @@ import shortlinksRoutes from './routes/shortlinks.js';
 import './types/context.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
+import type { ApiResponse } from '@repo/types';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { showRoutes } from 'hono/dev';
 import { logger } from 'hono/logger';
 
 const app = new Hono();
 
 app.use(logger());
+app.use(cors());
 
 app.use('/static/*', serveStatic({ root: './' }));
 app.use('/favicon.ico', serveStatic({ path: './static/favicon.svg' }));
@@ -20,6 +23,15 @@ app.use('/favicon.ico', serveStatic({ path: './static/favicon.svg' }));
 app.route('/auth', authRoutes);
 app.route('/dashboard', dashboardRoutes);
 app.route('/shortlinks', shortlinksRoutes);
+
+app.get('/hello', async (c) => {
+  const data: ApiResponse = {
+    message: 'Hello BHVR!',
+    success: true,
+  };
+
+  return c.json(data, { status: 200 });
+});
 
 app.get('/:code', async (c) => {
   const code = c.req.param('code');
