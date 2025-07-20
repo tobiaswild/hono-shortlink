@@ -1,12 +1,12 @@
 import { type RegisterSchema, registerSchema } from '@repo/schemas';
 import type { ApiErrorResponse, ApiSuccessResponse } from '@repo/types';
+import { Button } from '@repo/ui/button';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
 import FieldInfo from '../components/FieldInfo';
 import { SERVER_URL } from '../main';
-import { Button } from '@repo/ui/button';
 
 export const Route = createFileRoute('/register')({
   component: RouteComponent,
@@ -113,7 +113,7 @@ function RouteComponent() {
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <Button type="submit" disabled={!canSubmit}>
+            <Button type="submit" disabled={!canSubmit} appName="register">
               {isSubmitting ? '...' : 'Submit'}
             </Button>
           )}

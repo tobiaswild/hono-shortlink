@@ -8,7 +8,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = ({ children, appName, ...props }: ButtonProps) => (
-  <button {...props} onClick={() => alert(`Hello from your ${appName} app!`)}>
+  <button
+    {...props}
+    className="ui:bg-blue-600 ui:text-white ui:hover:bg-blue-700"
+  >
     {children}
   </button>
 );

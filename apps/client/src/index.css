@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@repo/tailwind-config";
+@import "@repo/ui/styles.css";
 
 @theme {
   --animate-logo-spin: logo-spin infinite 20s linear;
