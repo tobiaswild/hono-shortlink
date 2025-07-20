@@ -1,10 +1,7 @@
+import { CustomLink } from '@repo/ui/link';
 import type { QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import {
-  createRootRouteWithContext,
-  Link,
-  Outlet,
-} from '@tanstack/react-router';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Toaster } from 'react-hot-toast';
 
@@ -16,7 +13,7 @@ export const Route = createRootRouteWithContext<{
     return (
       <div>
         <p>This is the notFoundComponent configured on root route</p>
-        <Link to="/">Start Over</Link>
+        <CustomLink to="/">Start Over</CustomLink>
       </div>
     );
   },

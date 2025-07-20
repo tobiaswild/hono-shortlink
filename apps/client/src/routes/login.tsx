@@ -1,11 +1,15 @@
 import { type LoginSchema, loginSchema } from '@repo/schemas';
 import type { ApiErrorResponse, ApiSuccessResponse } from '@repo/types';
+import { AuthContainer } from '@repo/ui/auth-container';
 import { Button } from '@repo/ui/button';
+import { FieldInfo } from '@repo/ui/field-info';
+import { Form } from '@repo/ui/form';
+import { Input } from '@repo/ui/input';
+import { CustomLink } from '@repo/ui/link';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
-import FieldInfo from '../components/FieldInfo';
 import { SERVER_URL } from '../main';
 
 export const Route = createFileRoute('/login')({
@@ -44,12 +48,10 @@ function RouteComponent() {
     },
   });
 
-  console.log(form);
-
   return (
-    <div>
+    <AuthContainer>
       <h1>Login Form</h1>
-      <form
+      <Form
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -57,32 +59,11 @@ function RouteComponent() {
         }}
       >
         <div>
-          <form.Field
-            name="username"
-            children={(field) => {
-              return (
-                <>
-                  <label htmlFor={field.name}>Username:</label>
-                  <input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  <FieldInfo field={field} />
-                </>
-              );
-            }}
-          />
-        </div>
-        <div>
-          <form.Field
-            name="password"
-            children={(field) => (
+          <form.Field name="username">
+            {(field) => (
               <>
-                <label htmlFor={field.name}>Password:</label>
-                <input
+                <Input
+                  label="Username"
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
@@ -92,20 +73,44 @@ function RouteComponent() {
                 <FieldInfo field={field} />
               </>
             )}
-          />
+          </form.Field>
+        </div>
+        <div>
+          <form.Field name="password">
+            {(field) => (
+              <>
+                <Input
+                  label="Password"
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  type="password"
+                />
+                <FieldInfo field={field} />
+              </>
+            )}
+          </form.Field>
         </div>
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
-            <Button type="submit" disabled={!canSubmit} appName="client">
+        >
+          {([canSubmit, isSubmitting]) => (
+            <Button
+              type="submit"
+              disabled={!canSubmit}
+              fullWidth={true}
+              size="large"
+            >
               {isSubmitting ? '...' : 'Submit'}
             </Button>
           )}
-        />
-      </form>
+        </form.Subscribe>
+      </Form>
       <div>
-        Dont have an account? <Link to="/register">Register</Link>
+        Dont have an account? <CustomLink to="/register">Register</CustomLink>
       </div>
-    </div>
+    </AuthContainer>
   );
 }
