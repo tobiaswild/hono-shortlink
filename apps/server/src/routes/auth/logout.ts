@@ -1,3 +1,4 @@
+import type { ApiSuccessResponse } from '@repo/types';
 import { Hono } from 'hono';
 import sessionStore from '../../db/store/session.js';
 import { authMiddleware } from '../../middleware/auth.js';
@@ -13,8 +14,9 @@ app.post('/', authMiddleware, async (c) => {
 
   deleteSession(c);
 
-  return c.json({
+  return c.json<ApiSuccessResponse>({
     success: true,
+    type: 'success',
     message: 'you got logged out',
   });
 });

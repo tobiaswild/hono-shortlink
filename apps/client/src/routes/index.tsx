@@ -2,12 +2,11 @@ import type { ApiMessageResponse } from '@repo/types';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import beaver from '../assets/beaver.svg';
+import { SERVER_URL } from '../main';
 
 export const Route = createFileRoute('/')({
   component: Index,
 });
-
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
 function Index() {
   const { error, data, isFetching, refetch } = useQuery({

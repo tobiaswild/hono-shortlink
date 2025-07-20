@@ -1,5 +1,6 @@
 import { zValidator } from '@hono/zod-validator';
 import * as schemas from '@repo/schemas';
+import type { ApiErrorResponse, ApiSuccessResponse } from '@repo/types';
 import { Hono } from 'hono';
 import { APP_CONFIG } from '../../config/app.js';
 import sessionStore from '../../db/store/session.js';
@@ -16,7 +17,7 @@ app.post('/', zValidator('json', schemas.loginSchema), async (c) => {
 
   const user = await userStore.getByUsername(username);
   if (!user) {
-    return c.json(
+    return c.json<ApiErrorResponse>(
       {
         success: false,
         type: 'error',
@@ -28,7 +29,7 @@ app.post('/', zValidator('json', schemas.loginSchema), async (c) => {
 
   const isValidPassword = await verifyPassword(password, user.passwordHash);
   if (!isValidPassword) {
-    return c.json(
+    return c.json<ApiErrorResponse>(
       {
         success: false,
         type: 'error',
@@ -44,8 +45,9 @@ app.post('/', zValidator('json', schemas.loginSchema), async (c) => {
 
   setSession(c, sessionId);
 
-  return c.json({
+  return c.json<ApiSuccessResponse>({
     success: true,
+    type: 'success',
     message: 'your logged in',
   });
 });

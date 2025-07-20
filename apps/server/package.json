@@ -1,5 +1,5 @@
 {
-  "name": "hono-shortlink",
+  "name": "server",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",

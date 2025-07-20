@@ -1,5 +1,6 @@
 import { zValidator } from '@hono/zod-validator';
 import * as schemas from '@repo/schemas';
+import type { ApiErrorResponse, ApiSuccessResponse } from '@repo/types';
 import { Hono } from 'hono';
 import { APP_CONFIG } from '../../config/app.js';
 import sessionStore from '../../db/store/session.js';
@@ -9,33 +10,27 @@ import { setSession } from '../../util/session.js';
 
 const app = new Hono();
 
-app.post('/', zValidator('form', schemas.registerSchema), async (c) => {
-  const validated = c.req.valid('form');
+app.post('/', zValidator('json', schemas.registerSchema), async (c) => {
+  const validated = c.req.valid('json');
   const username = validated.username;
   const password = validated.password;
   const confirmPassword = validated.confirmPassword;
 
-  if (!username || !password || !confirmPassword) {
-    return c.json({
-      type: 'error',
-      message: 'Username and password are required',
-    });
-  }
-
   if (password !== confirmPassword) {
-    return c.json({ type: 'error', message: 'Passwords do not match' });
-  }
-
-  if (password.length < 6) {
-    return c.json({
+    return c.json<ApiErrorResponse>({
+      success: false,
       type: 'error',
-      message: 'Password must be at least 6 characters long',
+      message: 'Passwords do not match',
     });
   }
 
   const existingUser = await userStore.getByUsername(username);
   if (existingUser) {
-    return c.json({ type: 'error', message: 'Username already exists' });
+    return c.json<ApiErrorResponse>({
+      success: false,
+      type: 'error',
+      message: 'Username already exists',
+    });
   }
 
   const hashedPassword = await hashPassword(password);
@@ -43,7 +38,11 @@ app.post('/', zValidator('form', schemas.registerSchema), async (c) => {
 
   const newUser = await userStore.getByUsername(username);
   if (!newUser) {
-    return c.json({ type: 'error', message: 'Failed to create user' });
+    return c.json<ApiErrorResponse>({
+      success: false,
+      type: 'error',
+      message: 'Failed to create user',
+    });
   }
 
   const sessionId = crypto.randomUUID();
@@ -52,8 +51,10 @@ app.post('/', zValidator('form', schemas.registerSchema), async (c) => {
 
   setSession(c, sessionId);
 
-  return c.json({
+  return c.json<ApiSuccessResponse>({
     success: true,
+    type: 'success',
+    message: 'you got registered',
   });
 });
 

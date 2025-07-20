@@ -1,3 +1,4 @@
+import type { ApiErrorResponse } from '@repo/types';
 import { createMiddleware } from 'hono/factory';
 import type { User } from 'src/db/schema/user.js';
 import sessionStore from '../db/store/session.js';
@@ -11,9 +12,10 @@ export const authMiddleware = createMiddleware<{
 }>(async (c, next) => {
   const sessionId = getSession(c);
   if (!sessionId) {
-    return c.json(
+    return c.json<ApiErrorResponse>(
       {
         success: false,
+        type: 'error',
         message: 'an error occured',
       },
       400,
@@ -24,9 +26,10 @@ export const authMiddleware = createMiddleware<{
   if (!hasSession) {
     deleteSession(c);
 
-    return c.json(
+    return c.json<ApiErrorResponse>(
       {
         success: false,
+        type: 'error',
         message: 'an error occured',
       },
       400,
@@ -39,9 +42,10 @@ export const authMiddleware = createMiddleware<{
 
     deleteSession(c);
 
-    return c.json(
+    return c.json<ApiErrorResponse>(
       {
         success: false,
+        type: 'error',
         message: 'an error occured',
       },
       400,
@@ -53,9 +57,10 @@ export const authMiddleware = createMiddleware<{
 
     deleteSession(c);
 
-    return c.json(
+    return c.json<ApiErrorResponse>(
       {
         success: false,
+        type: 'error',
         message: 'an error occured',
       },
       400,
@@ -68,9 +73,10 @@ export const authMiddleware = createMiddleware<{
 
     deleteSession(c);
 
-    return c.json(
+    return c.json<ApiErrorResponse>(
       {
         success: false,
+        type: 'error',
         message: 'an error occured',
       },
       400,

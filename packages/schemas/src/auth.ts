@@ -18,6 +18,8 @@ export const loginSchema = z.object({
   password: passwordSchema,
 });
 
+export type LoginSchema = z.infer<typeof loginSchema>;
+
 export const registerSchema = z
   .object({
     username: usernameSchema,
@@ -28,3 +30,5 @@ export const registerSchema = z
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   });
+
+export type RegisterSchema = z.infer<typeof registerSchema>;

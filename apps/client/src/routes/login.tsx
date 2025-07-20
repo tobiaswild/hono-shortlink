@@ -1,33 +1,24 @@
-import { loginSchema } from '@repo/schemas';
+import { type LoginSchema, loginSchema } from '@repo/schemas';
 import type { ApiErrorResponse, ApiSuccessResponse } from '@repo/types';
-import { type AnyFieldApi, useForm } from '@tanstack/react-form';
+import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
+import FieldInfo from '../components/FieldInfo';
+import { SERVER_URL } from '../main';
+import { Button } from '@repo/ui/button';
 
 export const Route = createFileRoute('/login')({
   component: RouteComponent,
 });
 
-function FieldInfo({ field }: { field: AnyFieldApi }) {
-  return (
-    <>
-      {field.state.meta.isTouched && !field.state.meta.isValid ? (
-        <em>{field.state.meta.errors.map((err) => err.message).join(',')}</em>
-      ) : null}
-      {field.state.meta.isValidating ? 'Validating...' : null}
-    </>
-  );
-}
-
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
-
 function RouteComponent() {
+  const navigate = useNavigate();
+
   const loginMutation = useMutation({
-    mutationFn: async (values: {
-      username: string;
-      password: string;
-    }): Promise<ApiSuccessResponse | ApiErrorResponse> => {
+    mutationFn: async (
+      values: LoginSchema,
+    ): Promise<ApiSuccessResponse | ApiErrorResponse> => {
       const response = await fetch(`${SERVER_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,6 +36,8 @@ function RouteComponent() {
 
       if (response.success) {
         toast.success(response.message);
+
+        navigate({ to: '/dashboard' });
       } else {
         toast.error(response.message);
       }
@@ -53,7 +46,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <h1>Simple Form Example</h1>
+      <h1>Login Form</h1>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -67,7 +60,7 @@ function RouteComponent() {
             children={(field) => {
               return (
                 <>
-                  <label htmlFor={field.name}>First Name:</label>
+                  <label htmlFor={field.name}>Username:</label>
                   <input
                     id={field.name}
                     name={field.name}
@@ -86,7 +79,7 @@ function RouteComponent() {
             name="password"
             children={(field) => (
               <>
-                <label htmlFor={field.name}>Last Name:</label>
+                <label htmlFor={field.name}>Password:</label>
                 <input
                   id={field.name}
                   name={field.name}
@@ -102,12 +95,15 @@ function RouteComponent() {
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <button type="submit" disabled={!canSubmit}>
+            <Button type="submit" disabled={!canSubmit} appName="client">
               {isSubmitting ? '...' : 'Submit'}
-            </button>
+            </Button>
           )}
         />
       </form>
+      <div>
+        Dont have an account? <Link to="/register">Register</Link>
+      </div>
     </div>
   );
 }

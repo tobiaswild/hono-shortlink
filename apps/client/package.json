@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@repo/schemas": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-form": "^1.14.1",
     "@tanstack/react-query": "^5.83.0",
