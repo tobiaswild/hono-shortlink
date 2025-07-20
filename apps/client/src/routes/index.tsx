@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@repo/types';
+import type { ApiMessageResponse } from '@repo/types';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import beaver from '../assets/beaver.svg';
@@ -12,7 +12,7 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 function Index() {
   const { error, data, isFetching, refetch } = useQuery({
     queryKey: ['hello'],
-    queryFn: async (): Promise<ApiResponse> => {
+    queryFn: async (): Promise<ApiMessageResponse> => {
       const response = await fetch(`${SERVER_URL}/hello`);
       return await response.json();
     },

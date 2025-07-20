@@ -1,7 +1,9 @@
+import { loginSchema } from '@repo/schemas';
+import type { ApiErrorResponse, ApiSuccessResponse } from '@repo/types';
 import { type AnyFieldApi, useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { z } from 'zod/v4';
+import toast from 'react-hot-toast';
 
 export const Route = createFileRoute('/login')({
   component: RouteComponent,
@@ -18,39 +20,34 @@ function FieldInfo({ field }: { field: AnyFieldApi }) {
   );
 }
 
-const ZodSchema = z.object({
-  username: z.string().min(1),
-  password: z.string().min(1),
-});
-
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 
 function RouteComponent() {
-  const sendLoginRequest = useMutation({
-    mutationFn: async (value: { username: string; password: string }) => {
+  const loginMutation = useMutation({
+    mutationFn: async (values: {
+      username: string;
+      password: string;
+    }): Promise<ApiSuccessResponse | ApiErrorResponse> => {
       const response = await fetch(`${SERVER_URL}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(value),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
       });
-      return await response.json();
+      return response.json();
     },
   });
 
   const form = useForm({
-    defaultValues: {
-      username: '',
-      password: '',
-    },
-    validators: {
-      onChange: ZodSchema,
-    },
+    defaultValues: { username: '', password: '' },
+    validators: { onChange: loginSchema },
     onSubmit: async ({ value }) => {
-      console.log(value);
+      const response = await loginMutation.mutateAsync(value);
 
-      await sendLoginRequest.mutateAsync(value);
+      if (response.success) {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
     },
   });
 

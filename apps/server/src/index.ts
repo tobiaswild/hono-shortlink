@@ -1,11 +1,11 @@
 import { env } from './config/env.js';
-import urlStore from './db/store/shortlink.js';
+
 import authRoutes from './routes/auth/index.js';
 import shortlinksRoutes from './routes/shortlinks.js';
 import './types/context.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import type { ApiResponse } from '@repo/types';
+import type { ApiMessageResponse } from '@repo/types';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { showRoutes } from 'hono/dev';
@@ -23,24 +23,10 @@ app.route('/auth', authRoutes);
 app.route('/shortlinks', shortlinksRoutes);
 
 app.get('/hello', async (c) => {
-  const data: ApiResponse = {
+  return c.json<ApiMessageResponse>({
     message: 'Hello BHVR!',
     success: true,
-  };
-
-  return c.json(data, { status: 200 });
-});
-
-app.get('/:code', async (c) => {
-  const code = c.req.param('code');
-
-  const url = await urlStore.get(code);
-
-  if (!url) {
-    return c.notFound();
-  }
-
-  return c.redirect(url);
+  });
 });
 
 showRoutes(app);

@@ -1,9 +1,14 @@
-import type { Context, Next } from 'hono';
+import { createMiddleware } from 'hono/factory';
+import type { User } from 'src/db/schema/user.js';
 import sessionStore from '../db/store/session.js';
 import userStore from '../db/store/user.js';
 import { deleteSession, getSession } from '../util/session.js';
 
-export const requireAuth = async (c: Context, next: Next) => {
+export const authMiddleware = createMiddleware<{
+  Variables: {
+    user: User;
+  };
+}>(async (c, next) => {
   const sessionId = getSession(c);
   if (!sessionId) {
     return c.json(
@@ -75,4 +80,4 @@ export const requireAuth = async (c: Context, next: Next) => {
   c.set('user', user);
 
   await next();
-};
+});
