@@ -15,14 +15,14 @@ export const Input = ({
   <>
     <label
       htmlFor={props.id}
-      className={cn('ui:mb-1 ui:block ui:font-medium', labelClassName)}
+      className={cn('mb-1 block font-medium', labelClassName)}
     >
       {label}:
     </label>
     <input
       {...props}
       className={cn(
-        'ui:w-full ui:rounded ui:border ui:border-gray-300 ui:p-2.5 ui:text-base ui:focus:outline-none ui:focus:ring-2 ui:focus:ring-blue-500',
+        'w-full rounded border border-gray-300 p-2.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500',
         className,
       )}
     />

@@ -5,7 +5,7 @@ interface FormProps extends FormHTMLAttributes<HTMLFormElement> {}
 
 export const Form = ({ children, className = '', ...props }: FormProps) => {
   return (
-    <form className={cn('ui:flex ui:flex-col ui:gap-4', className)} {...props}>
+    <form className={cn('flex flex-col gap-4', className)} {...props}>
       {children}
     </form>
   );
