@@ -1,7 +1,7 @@
 import type { FormHTMLAttributes } from 'react';
 import { cn } from './utils';
 
-type FormProps = FormHTMLAttributes<HTMLFormElement>
+type FormProps = FormHTMLAttributes<HTMLFormElement>;
 
 export const Form = ({ children, className = '', ...props }: FormProps) => {
   return (
