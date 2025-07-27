@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
-    "@repo/tailwind-config": "workspace:*",
     "@repo/types": "workspace:*",
     "@tailwindcss/forms": "^0.5.10",
     "@tanstack/router-plugin": "^1.128.4",
