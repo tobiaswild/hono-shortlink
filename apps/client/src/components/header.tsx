@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
 import { env } from '../config/env';
 import { authClient } from '../utils/auth';
+import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
   const navigate = useNavigate();
@@ -31,20 +32,21 @@ export function Header() {
   }
 
   return (
-    <header className="border-gray-200 border-b bg-white shadow-sm">
+    <header className="border-gray-200 border-b bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <h1 className="font-semibold text-gray-900 text-xl">
+            <h1 className="font-semibold text-gray-900 text-xl dark:text-white">
               {env.APP_NAME}
             </h1>
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="text-gray-700 text-sm">
+            <div className="text-gray-700 text-sm dark:text-gray-300">
               Welcome,{' '}
               <span className="font-medium">{session.data.user.email}</span>
             </div>
+            <ThemeToggle />
             <Button variant="secondary" size="small" onClick={handleLogout}>
               Logout
             </Button>

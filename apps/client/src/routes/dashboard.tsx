@@ -181,11 +181,11 @@ function RouteComponent() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
         <Header />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 py-4">
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
               <div className="p-6">
                 <Form
                   onSubmit={(e) => {
@@ -245,7 +245,7 @@ function RouteComponent() {
                 </Form>
               </div>
             </div>
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
               <div className="p-6">
                 <table className="w-full table-auto border-collapse">
                   <thead>
@@ -254,9 +254,9 @@ function RouteComponent() {
                         {headerGroup.headers.map((header) => (
                           <th
                             key={header.id}
-                            className="border-gray-400 border-b bg-gray-50 p-4"
+                            className="border-gray-400 border-b bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700"
                           >
-                            <p className="block font-normal font-sans text-gray-900 leading-none antialiased opacity-70">
+                            <p className="block font-normal font-sans text-gray-900 leading-none antialiased opacity-70 dark:text-gray-100">
                               {header.isPlaceholder
                                 ? null
                                 : flexRender(
@@ -275,7 +275,7 @@ function RouteComponent() {
                         {row.getVisibleCells().map((cell) => (
                           <td
                             key={cell.id}
-                            className="border-gray-50 border-b p-4"
+                            className="border-gray-50 border-b p-4 dark:border-gray-700"
                           >
                             {flexRender(
                               cell.column.columnDef.cell,

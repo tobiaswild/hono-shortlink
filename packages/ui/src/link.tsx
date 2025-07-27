@@ -12,7 +12,10 @@ const BasicLinkComponent = React.forwardRef<HTMLAnchorElement, BasicLinkProps>(
       <a
         ref={ref}
         {...props}
-        className={cn('text-blue-700', props.className)}
+        className={cn(
+          'text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300',
+          props.className,
+        )}
       />
     );
   },
