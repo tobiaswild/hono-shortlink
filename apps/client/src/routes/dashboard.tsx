@@ -4,11 +4,6 @@ import {
   type DeleteShortlinkSchema,
 } from '@repo/schemas';
 import type { ApiResponse, Shortlink } from '@repo/types';
-import { Button } from '@repo/ui/button';
-import { Cell } from '@repo/ui/cell';
-import { FieldInfo } from '@repo/ui/field-info';
-import { Form } from '@repo/ui/form';
-import { Input } from '@repo/ui/input';
 import { useForm } from '@tanstack/react-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
@@ -22,8 +17,13 @@ import {
 import createHttpError from 'http-errors';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { Button } from '../components/button';
+import { Cell } from '../components/cell';
 import { EditModal } from '../components/edit-modal';
+import { FieldInfo } from '../components/field-info';
+import { Form } from '../components/form';
 import { Header } from '../components/header';
+import { Input } from '../components/input';
 import { ProtectedRoute } from '../components/protected-route';
 import { env } from '../config/env';
 

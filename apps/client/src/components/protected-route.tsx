@@ -1,7 +1,7 @@
-import { AuthContainer } from '@repo/ui/auth-container';
 import { useNavigate } from '@tanstack/react-router';
 import { type ReactNode, useEffect } from 'react';
 import { authClient } from '../utils/auth';
+import { AuthContainer } from './auth-container';
 
 interface ProtectedRouteProps {
   children: ReactNode;

@@ -1,9 +1,11 @@
 import type { FormHTMLAttributes } from 'react';
 import { cn } from './utils';
 
-interface CellProps extends FormHTMLAttributes<HTMLDivElement> {}
-
-export const Cell = ({ children, className = '', ...props }: CellProps) => {
+export const Cell = ({
+  children,
+  className = '',
+  ...props
+}: FormHTMLAttributes<HTMLDivElement>) => {
   return (
     <p
       className={cn(

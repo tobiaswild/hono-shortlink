@@ -1,6 +1,6 @@
-import { Button } from '@repo/ui/button';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import { Button } from './button';
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);

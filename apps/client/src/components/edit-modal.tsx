@@ -3,15 +3,15 @@ import {
   createShortlinkSchema,
 } from '@repo/schemas';
 import type { ApiResponse, Shortlink } from '@repo/types';
-import { Button } from '@repo/ui/button';
-import { FieldInfo } from '@repo/ui/field-info';
-import { Form } from '@repo/ui/form';
-import { Input } from '@repo/ui/input';
-import { Modal } from '@repo/ui/modal';
 import { useForm } from '@tanstack/react-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import createHttpError from 'http-errors';
 import toast from 'react-hot-toast';
+import { Button } from './button';
+import { FieldInfo } from './field-info';
+import { Form } from './form';
+import { Input } from './input';
+import { Modal } from './modal';
 
 export function EditModal({
   afterUpdate,

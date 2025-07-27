@@ -1,14 +1,14 @@
 import { loginSchema } from '@repo/schemas';
-import { AuthContainer } from '@repo/ui/auth-container';
-import { Button } from '@repo/ui/button';
-import { FieldInfo } from '@repo/ui/field-info';
-import { Form } from '@repo/ui/form';
-import { Input } from '@repo/ui/input';
-import { CustomLink } from '@repo/ui/link';
 import { useForm } from '@tanstack/react-form';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { AuthContainer } from '../components/auth-container';
+import { Button } from '../components/button';
+import { FieldInfo } from '../components/field-info';
+import { Form } from '../components/form';
+import { Input } from '../components/input';
+import { CustomLink } from '../components/link';
 import { ThemeToggle } from '../components/theme-toggle';
 import { authClient } from '../utils/auth';
 

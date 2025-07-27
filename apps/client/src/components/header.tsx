@@ -1,8 +1,8 @@
-import { Button } from '@repo/ui/button';
 import { useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
 import { env } from '../config/env';
 import { authClient } from '../utils/auth';
+import { Button } from './button';
 import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
