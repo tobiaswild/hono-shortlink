@@ -1,178 +1,109 @@
-import { zValidator } from '@hono/zod-validator';
-import type {
-  ApiErrorResponse,
-  ApiResponse,
-  ApiSuccessResponse,
-} from '@repo/types';
-import { Hono } from 'hono';
-import type { Shortlink } from 'src/db/types/shortlink.js';
-import z from 'zod';
-import shortlinkStore from '../db/store/shortlink.js';
-import { authMiddleware } from '../middleware/auth.js';
-import { getCode } from '../util/code.js';
+import { zValidator } from "@hono/zod-validator";
+import {
+  createShortlinkSchema,
+  paramShortlinkSchema,
+  patchShortlinkSchema,
+} from "@repo/schemas";
+import type { ApiResponse } from "@repo/types";
+import { Hono } from "hono";
+import { authMiddleware } from "../middleware/auth";
+import { NotFoundError } from "../errors/not-found-error";
+import type { Shortlink } from "../schema/shortlink";
+import { ShortlinkStore } from "../store/shortlink";
 
 const app = new Hono();
 
-const shortlinkParamSchema = z.object({
-  code: z.string().min(6),
-});
+app.get("/", authMiddleware, async (c) => {
+  const user = c.get("user");
 
-export type ShortlinksResponse = ApiResponse & {
-  shortlinks: Shortlink[];
-};
+  const shortlinks = await ShortlinkStore.getAllForUser(user);
 
-app.get('/', authMiddleware, async (c) => {
-  const user = c.get('user');
-
-  const shortlinks = await shortlinkStore.getAllForUser(user);
-
-  return c.json<ShortlinksResponse>({
+  return c.json<ApiResponse<Shortlink[]>>({
     success: true,
-    shortlinks,
+    data: shortlinks,
   });
 });
 
-const createShortlinkSchema = z.object({
-  url: z.url(),
-  customCode: z.string().min(6).max(6).optional(),
-});
-
 app.post(
-  '/',
+  "/",
   authMiddleware,
-  zValidator('json', createShortlinkSchema),
-  async (c): Promise<Response> => {
-    const user = c.get('user');
-
-    const validated = c.req.valid('json');
-    const url = validated.url;
-    const customCode = validated.customCode;
-
-    if (!url) {
-      return c.json<ApiErrorResponse>({
-        success: false,
-        type: 'error',
-        message: 'URL is required',
-      });
-    }
-
-    let code = customCode;
-
-    if (!customCode) {
-      try {
-        code = await getCode();
-      } catch (err) {
-        console.error(err);
-
-        return c.json<ApiErrorResponse>({
-          success: false,
-          type: 'error',
-          message: 'Failed to create shortlink code',
-        });
-      }
-    }
-
-    if (!code) {
-      return c.json<ApiErrorResponse>({
-        success: false,
-        type: 'error',
-        message: 'No code given',
-      });
-    }
-
-    try {
-      await shortlinkStore.createForUser(user, code, url);
-    } catch (err) {
-      console.error(err);
-
-      return c.json<ApiErrorResponse>({
-        success: false,
-        type: 'error',
-        message: 'an error occured',
-      });
-    }
-
-    return c.json<ApiSuccessResponse>({
-      success: true,
-      type: 'success',
-      message: 'Shortlink created',
-    });
-  },
-);
-
-type ShortlinkResponse = ApiResponse & {
-  success: true;
-  shortlink: Shortlink;
-};
-
-app.get(
-  '/:code',
-  zValidator('param', shortlinkParamSchema),
-  authMiddleware,
+  zValidator("json", createShortlinkSchema),
   async (c) => {
-    const validated = c.req.valid('param');
+    const user = c.get("user");
+    const validated = c.req.valid("json");
+    const url = validated.url;
     const code = validated.code;
 
-    const user = c.get('user');
+    const data = await ShortlinkStore.createForUser(user, code, url);
 
-    const shortlink = await shortlinkStore.getForUser(user, code);
-
-    return c.json<ShortlinkResponse>({
+    return c.json<ApiResponse<Shortlink>>({
       success: true,
-      shortlink,
+      data,
     });
   },
 );
 
-const shortlinkPatchSchema = z.object({
-  url: z.url(),
-});
-
-app.patch(
-  '/:code',
-  zValidator('param', shortlinkParamSchema),
-  zValidator('json', shortlinkPatchSchema),
+app.get(
+  "/:code",
+  zValidator("param", paramShortlinkSchema),
   authMiddleware,
   async (c) => {
-    const code = c.req.valid('param').code;
+    const validated = c.req.valid("param");
+    const code = validated.code;
 
-    const url = c.req.valid('json').url;
+    const user = c.get("user");
 
-    const user = c.get('user');
+    const shortlink = await ShortlinkStore.getForUser(user, code);
 
-    await shortlinkStore.updateForUser(user, code, url);
+    if (!shortlink) {
+      throw new NotFoundError("Shortlink");
+    }
 
-    return c.json<ApiSuccessResponse>({
+    return c.json<ApiResponse<Shortlink>>({
       success: true,
-      type: 'success',
-      message: 'shortlink updated',
+      data: shortlink,
+    });
+  },
+);
+
+app.patch(
+  "/:code",
+  zValidator("param", paramShortlinkSchema),
+  zValidator("json", patchShortlinkSchema),
+  authMiddleware,
+  async (c) => {
+    const param = c.req.valid("param");
+    const code = param.code;
+
+    const json = c.req.valid("json");
+    const url = json.url;
+
+    const user = c.get("user");
+
+    const data = await ShortlinkStore.updateForUser(user, code, url);
+
+    return c.json<ApiResponse<Shortlink>>({
+      success: true,
+      data,
     });
   },
 );
 
 app.delete(
-  '/:code',
-  zValidator('param', shortlinkParamSchema),
+  "/:code",
+  zValidator("param", paramShortlinkSchema),
   authMiddleware,
   async (c) => {
-    const user = c.get('user');
+    const param = c.req.valid("param");
+    const code = param.code;
 
-    const validated = c.req.valid('param');
-    const code = validated.code;
+    const user = c.get("user");
 
-    const deleted = await shortlinkStore.deleteForUser(user, code);
-    if (!deleted) {
-      return c.json<ApiErrorResponse>({
-        success: false,
-        type: 'error',
-        message: 'Failed to delete shortlink',
-      });
-    }
+    const deleted = await ShortlinkStore.deleteForUser(user, code);
 
-    return c.json<ApiSuccessResponse>({
+    return c.json<ApiResponse<Shortlink>>({
       success: true,
-      type: 'success',
-      message: 'Shortlink deleted',
+      data: deleted,
     });
   },
 );

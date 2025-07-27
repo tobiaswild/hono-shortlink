@@ -1,17 +1,12 @@
-export type ApiResponse = {
-  success: boolean;
-};
+export type ApiResponse<T> =
+  | { success: true; data: T }
+  | { success: false; error: { message: string; code?: string | number } };
 
-export type ApiMessageResponse = ApiResponse & {
-  message: string;
-};
-
-export type ApiErrorResponse = ApiMessageResponse & {
-  success: false;
-  type: 'error';
-};
-
-export type ApiSuccessResponse = ApiMessageResponse & {
-  success: true;
-  type: 'success';
+export type Shortlink = {
+  id: number;
+  userId: string;
+  url: string;
+  code: string;
+  createdAt: Date;
+  updatedAt: Date;
 };

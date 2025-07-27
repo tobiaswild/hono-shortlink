@@ -1,7 +1,8 @@
-import type { User } from '../db/schema/user.js';
+import type { Session, User } from 'better-auth';
 
 declare module 'hono' {
   interface ContextVariableMap {
     user?: User;
+    session?: Session;
   }
 }

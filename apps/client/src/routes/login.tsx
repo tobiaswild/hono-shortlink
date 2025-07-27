@@ -1,5 +1,4 @@
-import { type LoginSchema, loginSchema } from '@repo/schemas';
-import type { ApiErrorResponse, ApiSuccessResponse } from '@repo/types';
+import { loginSchema } from '@repo/schemas';
 import { AuthContainer } from '@repo/ui/auth-container';
 import { Button } from '@repo/ui/button';
 import { FieldInfo } from '@repo/ui/field-info';
@@ -7,10 +6,9 @@ import { Form } from '@repo/ui/form';
 import { Input } from '@repo/ui/input';
 import { CustomLink } from '@repo/ui/link';
 import { useForm } from '@tanstack/react-form';
-import { useMutation } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
-import { SERVER_URL } from '../main';
+import { authClient } from '../utils/auth';
 
 export const Route = createFileRoute('/login')({
   component: RouteComponent,
@@ -19,34 +17,36 @@ export const Route = createFileRoute('/login')({
 function RouteComponent() {
   const navigate = useNavigate();
 
-  const loginMutation = useMutation({
-    mutationFn: async (
-      values: LoginSchema,
-    ): Promise<ApiSuccessResponse | ApiErrorResponse> => {
-      const response = await fetch(`${SERVER_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-      return response.json();
-    },
-  });
-
   const form = useForm({
-    defaultValues: { username: '', password: '' },
+    defaultValues: { email: '', password: '' },
     validators: { onChange: loginSchema },
     onSubmit: async ({ value }) => {
-      const response = await loginMutation.mutateAsync(value);
-
-      if (response.success) {
-        toast.success(response.message);
-
-        navigate({ to: '/dashboard' });
-      } else {
-        toast.error(response.message);
-      }
+      await authClient.signIn.email(
+        {
+          email: value.email,
+          password: value.password,
+          callbackURL: '/dashboard',
+        },
+        {
+          onSuccess: (ctx) => {
+            toast.success(ctx.response.url);
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+          },
+        },
+      );
     },
   });
+
+  const session = authClient.useSession();
+
+  if (session.isPending) return 'Loading...';
+
+  if (session.data !== null) {
+    navigate({ to: '/dashboard' });
+    return;
+  }
 
   return (
     <AuthContainer>
@@ -59,11 +59,11 @@ function RouteComponent() {
         }}
       >
         <div>
-          <form.Field name="username">
+          <form.Field name="email">
             {(field) => (
               <>
                 <Input
-                  label="Username"
+                  label="Email"
                   id={field.name}
                   name={field.name}
                   value={field.state.value}

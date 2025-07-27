@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1751226339221,
-      "tag": "0000_cooing_talos",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1751820566289,
-      "tag": "0001_furry_bloodstorm",
+      "when": 1753523494625,
+      "tag": "0000_sudden_kingpin",
       "breakpoints": true
     }
   ]

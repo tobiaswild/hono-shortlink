@@ -1,89 +1,22 @@
-import type { ApiErrorResponse } from '@repo/types';
-import { createMiddleware } from 'hono/factory';
-import type { User } from 'src/db/schema/user.js';
-import sessionStore from '../db/store/session.js';
-import userStore from '../db/store/user.js';
-import { deleteSession, getSession } from '../util/session.js';
+import type { Session, User } from "better-auth";
+import { createMiddleware } from "hono/factory";
+import { auth } from "../utils/auth";
+import { UnauthorizedError } from "../errors/unauthorized-error";
 
 export const authMiddleware = createMiddleware<{
   Variables: {
     user: User;
+    session: Session;
   };
 }>(async (c, next) => {
-  const sessionId = getSession(c);
-  if (!sessionId) {
-    return c.json<ApiErrorResponse>(
-      {
-        success: false,
-        type: 'error',
-        message: 'an error occured',
-      },
-      400,
-    );
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+  if (session === null) {
+    throw new UnauthorizedError();
   }
 
-  const hasSession = await sessionStore.has(sessionId);
-  if (!hasSession) {
-    deleteSession(c);
+  c.set("user", session.user);
+  c.set("session", session.session);
 
-    return c.json<ApiErrorResponse>(
-      {
-        success: false,
-        type: 'error',
-        message: 'an error occured',
-      },
-      400,
-    );
-  }
-
-  const session = await sessionStore.get(sessionId);
-  if (!session) {
-    await sessionStore.delete(sessionId);
-
-    deleteSession(c);
-
-    return c.json<ApiErrorResponse>(
-      {
-        success: false,
-        type: 'error',
-        message: 'an error occured',
-      },
-      400,
-    );
-  }
-
-  if (session.expires < Date.now()) {
-    sessionStore.delete(sessionId);
-
-    deleteSession(c);
-
-    return c.json<ApiErrorResponse>(
-      {
-        success: false,
-        type: 'error',
-        message: 'an error occured',
-      },
-      400,
-    );
-  }
-
-  const user = await userStore.getById(session.userId);
-  if (!user) {
-    sessionStore.delete(sessionId);
-
-    deleteSession(c);
-
-    return c.json<ApiErrorResponse>(
-      {
-        success: false,
-        type: 'error',
-        message: 'an error occured',
-      },
-      400,
-    );
-  }
-
-  c.set('user', user);
-
-  await next();
+  return next();
 });

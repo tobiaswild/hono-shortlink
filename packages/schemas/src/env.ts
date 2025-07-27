@@ -12,3 +12,5 @@ export const envSchema = z.object({
     .enum(['development', 'production', 'test'])
     .default('development'),
 });
+
+export type Env = z.infer<typeof envSchema>;

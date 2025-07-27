@@ -4,9 +4,6 @@ import { routeTree } from './routeTree.gen';
 import './index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-export const SERVER_URL =
-  import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
-
 const queryClient = new QueryClient();
 
 const router = createRouter({
