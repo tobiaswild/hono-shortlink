@@ -1,8 +1,8 @@
-import type { User } from "better-auth";
-import { and, eq } from "drizzle-orm";
-import { NotFoundError } from "../errors/not-found-error";
-import { shortlink } from "../schema/shortlink";
-import { db } from "../utils/db";
+import type { User } from 'better-auth';
+import { and, eq } from 'drizzle-orm';
+import { NotFoundError } from '../errors/not-found-error';
+import { shortlink } from '../schema/shortlink';
+import { db } from '../utils/db';
 
 export const ShortlinkStore = {
   async getAllForUser(user: User) {
@@ -23,7 +23,7 @@ export const ShortlinkStore = {
       .returning();
 
     if (!link) {
-      throw new Error("Failed to create shortlink");
+      throw new Error('Failed to create shortlink');
     }
 
     return link;
@@ -43,7 +43,7 @@ export const ShortlinkStore = {
       .returning();
 
     if (!link) {
-      throw new NotFoundError("Shortlink");
+      throw new NotFoundError('Shortlink');
     }
 
     return link;
@@ -55,7 +55,7 @@ export const ShortlinkStore = {
       .returning();
 
     if (!link) {
-      throw new NotFoundError("Shortlink");
+      throw new NotFoundError('Shortlink');
     }
 
     return link;

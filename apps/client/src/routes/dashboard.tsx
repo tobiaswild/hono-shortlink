@@ -23,12 +23,15 @@ import createHttpError from 'http-errors';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { EditModal } from '../components/edit-modal';
+import { Header } from '../components/header';
+import { ProtectedRoute } from '../components/protected-route';
+import { env } from '../config/env';
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
 });
 
-const REDIRECT_HOST = 'http://localhost:3000/redirect';
+const REDIRECT_HOST = env.REDIRECT_BASE_URL;
 
 const columnHelper = createColumnHelper<Shortlink>();
 
@@ -177,111 +180,114 @@ function RouteComponent() {
   });
 
   return (
-    <>
+    <ProtectedRoute>
       <div className="min-h-screen bg-gray-100">
-        <div className="flex flex-col gap-4 p-4">
-          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
-            <div className="p-6">
-              <Form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  form.handleSubmit();
-                }}
-              >
-                <div>
-                  <form.Field name="url">
-                    {(field) => (
-                      <>
-                        <Input
-                          label="Url"
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                        />
-                        <FieldInfo field={field} />
-                      </>
-                    )}
-                  </form.Field>
-                </div>
-                <div>
-                  <form.Field name="code">
-                    {(field) => (
-                      <>
-                        <Input
-                          label="Code"
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                        />
-                        <FieldInfo field={field} />
-                      </>
-                    )}
-                  </form.Field>
-                </div>
-                <form.Subscribe
-                  selector={(state) => [state.canSubmit, state.isSubmitting]}
+        <Header />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 py-4">
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
+              <div className="p-6">
+                <Form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    form.handleSubmit();
+                  }}
                 >
-                  {([canSubmit, isSubmitting]) => (
-                    <Button
-                      type="submit"
-                      disabled={!canSubmit}
-                      fullWidth={true}
-                      size="large"
-                    >
-                      {isSubmitting ? 'Submitting...' : 'Create Shortlink'}
-                    </Button>
-                  )}
-                </form.Subscribe>
-              </Form>
+                  <div>
+                    <form.Field name="url">
+                      {(field) => (
+                        <>
+                          <Input
+                            label="Url"
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                          />
+                          <FieldInfo field={field} />
+                        </>
+                      )}
+                    </form.Field>
+                  </div>
+                  <div>
+                    <form.Field name="code">
+                      {(field) => (
+                        <>
+                          <Input
+                            label="Code"
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                          />
+                          <FieldInfo field={field} />
+                        </>
+                      )}
+                    </form.Field>
+                  </div>
+                  <form.Subscribe
+                    selector={(state) => [state.canSubmit, state.isSubmitting]}
+                  >
+                    {([canSubmit, isSubmitting]) => (
+                      <Button
+                        type="submit"
+                        disabled={!canSubmit}
+                        fullWidth={true}
+                        size="large"
+                      >
+                        {isSubmitting ? 'Submitting...' : 'Create Shortlink'}
+                      </Button>
+                    )}
+                  </form.Subscribe>
+                </Form>
+              </div>
             </div>
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
-            <div className="p-6">
-              <table className="w-full table-auto border-collapse">
-                <thead>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <th
-                          key={header.id}
-                          className="border-gray-400 border-b bg-gray-50 p-4"
-                        >
-                          <p className="block font-normal font-sans text-gray-900 leading-none antialiased opacity-70">
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext(),
-                                )}
-                          </p>
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody>
-                  {table.getRowModel().rows.map((row) => (
-                    <tr key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className="border-gray-50 border-b p-4"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
+              <div className="p-6">
+                <table className="w-full table-auto border-collapse">
+                  <thead>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <th
+                            key={header.id}
+                            className="border-gray-400 border-b bg-gray-50 p-4"
+                          >
+                            <p className="block font-normal font-sans text-gray-900 leading-none antialiased opacity-70">
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext(),
+                                  )}
+                            </p>
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                      <tr key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            className="border-gray-50 border-b p-4"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -292,6 +298,6 @@ function RouteComponent() {
         onClose={() => setOpenModal(false)}
         afterUpdate={() => handleUpdate()}
       />
-    </>
+    </ProtectedRoute>
   );
 }

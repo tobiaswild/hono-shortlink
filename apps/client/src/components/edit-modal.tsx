@@ -24,10 +24,6 @@ export function EditModal({
   onClose: () => void;
   afterUpdate: () => void;
 }) {
-  if (code === null) {
-    return '';
-  }
-
   const updateShortlinkMutation = useMutation({
     mutationFn: async (
       values: CreateShortlinkSchema,
@@ -46,8 +42,9 @@ export function EditModal({
   });
 
   const { data: shortlink } = useQuery({
-    queryKey: ['shortlinks'],
+    queryKey: ['shortlink', code],
     queryFn: async (): Promise<ApiResponse<Shortlink>> => {
+      if (!code) throw new Error('No code provided');
       const response = await fetch(`/api/shortlinks/${code}`);
 
       if (!response.ok) {
@@ -56,6 +53,7 @@ export function EditModal({
 
       return await response.json();
     },
+    enabled: !!code,
     retry: () => false,
   });
 
@@ -66,7 +64,7 @@ export function EditModal({
           url: shortlink.data.url,
         }
       : {
-          code: '',
+          code: code || '',
           url: '',
         },
     validators: { onChange: createShortlinkSchema },
@@ -81,10 +79,14 @@ export function EditModal({
     },
   });
 
+  if (code === null) {
+    return null;
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="mb-2 font-bold text-xl">Hello Modal 👋</h2>
-      <p>This is a modal content.</p>
+      <h2 className="mb-2 font-bold text-xl">Edit Shortlink</h2>
+      <p>Update the URL for this shortlink.</p>
       <Form
         onSubmit={(e) => {
           e.preventDefault();
@@ -137,7 +139,7 @@ export function EditModal({
               fullWidth={true}
               size="large"
             >
-              {isSubmitting ? 'Submitting...' : 'Create Shortlink'}
+              {isSubmitting ? 'Updating...' : 'Update Shortlink'}
             </Button>
           )}
         </form.Subscribe>

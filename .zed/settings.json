@@ -1,0 +1,94 @@
+{
+  "format_on_save": "on",
+  "tab_size": 2,
+  "indent_guides": {
+    "enabled": true
+  },
+  "formatter": {
+    "external": {
+      "command": "npx",
+      "arguments": ["biome", "format", "--stdin-file-path", "{path}"]
+    }
+  },
+  "code_actions_on_format": {
+    "source.organizeImports": true,
+    "source.fixAll.biome": true
+  },
+  "languages": {
+    "TypeScript": {
+      "format_on_save": "on",
+      "tab_size": 2,
+      "hard_tabs": false,
+      "formatter": {
+        "external": {
+          "command": "npx",
+          "arguments": ["biome", "format", "--stdin-file-path", "{path}"]
+        }
+      },
+      "enable_language_server": true,
+      "code_actions_on_format": {
+        "source.organizeImports": true,
+        "source.fixAll.biome": true
+      }
+    },
+    "JavaScript": {
+      "format_on_save": "on",
+      "tab_size": 2,
+      "hard_tabs": false,
+      "formatter": {
+        "external": {
+          "command": "npx",
+          "arguments": ["biome", "format", "--stdin-file-path", "{path}"]
+        }
+      },
+      "enable_language_server": true,
+      "code_actions_on_format": {
+        "source.organizeImports": true,
+        "source.fixAll.biome": true
+      }
+    },
+    "TSX": {
+      "format_on_save": "on",
+      "tab_size": 2,
+      "hard_tabs": false,
+      "formatter": {
+        "external": {
+          "command": "npx",
+          "arguments": ["biome", "format", "--stdin-file-path", "{path}"]
+        }
+      },
+      "enable_language_server": true,
+      "code_actions_on_format": {
+        "source.organizeImports": true,
+        "source.fixAll.biome": true
+      }
+    },
+    "JSX": {
+      "format_on_save": "on",
+      "tab_size": 2,
+      "hard_tabs": false,
+      "formatter": {
+        "external": {
+          "command": "npx",
+          "arguments": ["biome", "format", "--stdin-file-path", "{path}"]
+        }
+      },
+      "enable_language_server": true,
+      "code_actions_on_format": {
+        "source.organizeImports": true,
+        "source.fixAll.biome": true
+      }
+    },
+    "JSON": {
+      "format_on_save": "on",
+      "tab_size": 2,
+      "hard_tabs": false,
+      "formatter": {
+        "external": {
+          "command": "npx",
+          "arguments": ["biome", "format", "--stdin-file-path", "{path}"]
+        }
+      }
+    }
+  }
+}

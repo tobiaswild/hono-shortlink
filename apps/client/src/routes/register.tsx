@@ -7,6 +7,7 @@ import { Input } from '@repo/ui/input';
 import { CustomLink } from '@repo/ui/link';
 import { useForm } from '@tanstack/react-form';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { authClient } from '../utils/auth';
 
@@ -16,6 +17,13 @@ export const Route = createFileRoute('/register')({
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const session = authClient.useSession();
+
+  useEffect(() => {
+    if (session.data !== null) {
+      navigate({ to: '/dashboard' });
+    }
+  }, [session.data, navigate]);
 
   const form = useForm({
     defaultValues: { email: '', password: '', confirmPassword: '' },
@@ -29,8 +37,8 @@ function RouteComponent() {
           callbackURL: '/dashboard',
         },
         {
-          onSuccess: (ctx) => {
-            toast.success(ctx.response.url);
+          onSuccess: () => {
+            toast.success('Account created successfully');
           },
           onError: (ctx) => {
             toast.error(ctx.error.message);
@@ -40,13 +48,12 @@ function RouteComponent() {
     },
   });
 
-  const session = authClient.useSession();
-
-  if (session.isPending) return 'Loading...';
+  if (session.isPending) {
+    return <AuthContainer>Loading...</AuthContainer>;
+  }
 
   if (session.data !== null) {
-    navigate({ to: '/dashboard' });
-    return;
+    return null;
   }
 
   return (
@@ -122,13 +129,13 @@ function RouteComponent() {
               fullWidth={true}
               size="large"
             >
-              {isSubmitting ? '...' : 'Submit'}
+              {isSubmitting ? 'Creating account...' : 'Create account'}
             </Button>
           )}
         </form.Subscribe>
       </Form>
       <div>
-        Already have an acoount? <CustomLink to="/login">Login</CustomLink>
+        Already have an account? <CustomLink to="/login">Login</CustomLink>
       </div>
     </AuthContainer>
   );
